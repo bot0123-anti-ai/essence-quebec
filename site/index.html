@@ -40,7 +40,7 @@ svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke
 .seg{display:flex;gap:2px;background:var(--soft);border-radius:12px;padding:3px}
 .seg button{flex:1 1 0;font:inherit;font-size:14px;font-weight:500;min-height:40px;padding:0 6px;border-radius:10px;border:0;background:transparent;color:var(--mute);cursor:pointer;white-space:nowrap}
 .seg button[aria-pressed=true]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px #0000001f}
-body[data-tab=trend] .hide-trend,body[data-tab=alert] .hide-alert{display:none}
+body[data-tab=trend] .hide-trend,body[data-tab=alert] .hide-alert,body[data-tab=route] .hide-route{display:none}
 .seg button.far{display:none}body.far .seg button.far{display:block}
 .farck{font-size:13px;color:var(--mute);min-height:28px;margin:-2px 0 0 4px}.farck input{width:16px;height:16px;accent-color:var(--green)}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
@@ -113,7 +113,7 @@ ol.steps a:not(.b){color:var(--gtext);font-weight:600}
 code{background:var(--soft);border-radius:6px;padding:1px 6px;overflow-wrap:anywhere;font-size:14px}
 .bnav{position:fixed;left:0;right:0;bottom:0;background:light-dark(#f9f9fbf2,#141518f2);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:.5px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:10}
 .bnav .in{display:flex;justify-content:space-around;padding:0 6px}
-.bnav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;padding:7px 0 8px;min-height:56px;font:inherit;font-size:11px;font-weight:500;color:var(--mute);cursor:pointer}
+.bnav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;padding:7px 0 8px;min-height:56px;font:inherit;font-size:11px;min-width:0;font-weight:500;color:var(--mute);cursor:pointer}
 .bnav button svg.i{width:24px;height:24px}
 .bnav button[aria-current=page]{color:var(--green)}
 @media(prefers-reduced-motion:no-preference){.hero{animation:up .3s ease-out}@keyframes up{from{opacity:0;transform:translateY(6px)}}}
@@ -147,10 +147,10 @@ code{background:var(--soft);border-radius:6px;padding:1px 6px;overflow-wrap:anyw
   <div class="ctl hide-alert">
     <div class="seg" data-k="fuel" role="group" aria-label="Carburant">
       <button type="button" data-v="0">Régulier</button><button type="button" data-v="1">Super</button><button type="button" data-v="2">Diesel</button></div>
-    <div class="seg hide-trend" data-k="radius" role="group" aria-label="Distance maximum">
+    <div class="seg hide-trend hide-route" data-k="radius" role="group" aria-label="Distance maximum">
       <button type="button" data-v="3">3 km</button><button type="button" data-v="5">5 km</button><button type="button" data-v="10">10 km</button><button type="button" data-v="25">25 km</button><button type="button" class="far" data-v="50">50 km</button><button type="button" class="far" data-v="100">100 km</button></div>
-    <label class="ck farck hide-trend"><input type="checkbox" id="farCk"> Chercher plus loin (jusqu'à 100 km)</label>
-    <div class="seg hide-trend" data-k="sort" role="group" aria-label="Trier par">
+    <label class="ck farck hide-trend hide-route"><input type="checkbox" id="farCk"> Chercher plus loin (jusqu'à 100 km)</label>
+    <div class="seg hide-trend hide-route" data-k="sort" role="group" aria-label="Trier par">
       <button type="button" data-v="best">Meilleur choix</button><button type="button" data-v="price">Moins cher</button><button type="button" data-v="dist">Plus proche</button></div>
   </div>
 
@@ -192,6 +192,24 @@ code{background:var(--soft);border-radius:6px;padding:1px 6px;overflow-wrap:anyw
       </div>
       <div class="swrow" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px"><span>Inclure Costco <span class="ad" style="display:inline">(membres seulement)</span></span><button class="sw" id="costcoSw" role="switch" aria-checked="true" aria-label="Inclure Costco" type="button"></button></div>
     </div>
+  </div>
+
+  <div id="v-route" hidden>
+    <h2 class="t">Sur mon trajet</h2>
+    <form class="card" id="rtForm" style="display:grid;gap:10px">
+      <p class="note" style="margin:0">Départ : <b id="rtFrom">ta position</b> · <button class="lnk" type="button" id="rtFromChg">changer</button></p>
+      <div class="row">
+        <input type="text" id="rtTo" list="cities" placeholder="Destination : ville ou code postal" autocomplete="off">
+        <button class="b dark" type="submit">Chercher</button>
+      </div>
+      <div class="grp"><span>Détour maximum hors de la route</span><div class="seg" data-k="det">
+        <button type="button" data-v="1">1 km</button><button type="button" data-v="3">3 km</button><button type="button" data-v="5">5 km</button></div></div>
+      <p class="err" id="rtErr"></p>
+    </form>
+    <div id="rtHero"></div>
+    <h3 id="rtLh" hidden>Autres arrêts possibles</h3>
+    <ul class="list" id="rtList"></ul>
+    <p class="note" id="rtNote"></p>
   </div>
 
   <div id="v-map" hidden>
@@ -236,6 +254,7 @@ code{background:var(--soft);border-radius:6px;padding:1px 6px;overflow-wrap:anyw
 <nav class="bnav" aria-label="Sections">
   <div class="in">
     <button type="button" data-t="list"><svg class="i" viewBox="0 0 24 24"><path d="M14 11h1a2 2 0 0 1 2 2v3a1.5 1.5 0 0 0 3 0V9l-3-3"/><path d="M4 20V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v14"/><path d="M3 20h12"/><path d="M18 7v1a1 1 0 0 0 1 1h1"/><path d="M4 11h10"/></svg>Prix</button>
+    <button type="button" data-t="route"><svg class="i" viewBox="0 0 24 24"><circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M12 19h4.5a3.5 3.5 0 0 0 0-7h-8a3.5 3.5 0 0 1 0-7H12"/></svg>Trajet</button>
     <button type="button" data-t="map"><svg class="i" viewBox="0 0 24 24"><path d="M3 7l6-3l6 3l6-3v13l-6 3l-6-3l-6 3V7"/><path d="M9 4v13"/><path d="M15 7v13"/></svg>Carte</button>
     <button type="button" data-t="trend"><svg class="i" viewBox="0 0 24 24"><path d="M4 19h16"/><path d="M4 15l4-6l4 2l4-5l4 4"/></svg>Tendance</button>
     <button type="button" data-t="alert"><svg class="i" viewBox="0 0 24 24"><path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3H4a4 4 0 0 0 2-3v-3a7 7 0 0 1 4-6"/><path d="M9 17v1a3 3 0 0 0 6 0v-1"/></svg>Alerte</button>
@@ -260,7 +279,7 @@ const km = d => (d<10?fmt1(d):Math.round(d).toLocaleString('fr-CA'))+' km';
 const when = t => new Date(t).toLocaleString('fr-CA',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'});
 
 let S = [], TS = 0, OUT = [], gpsOk = false, showAll = false;
-let set = Object.assign({fuel:0,radius:5,sort:'best',costco:1,tank:50,cons:8,tab:'list'}, store.get('set',{}));
+let set = Object.assign({fuel:0,radius:5,sort:'best',costco:1,tank:50,cons:8,tab:'list',det:3}, store.get('set',{}));
 let pos = store.get('pos', null), home = store.get('home', null);
 if (pos && pos.label==='Ma position') pos.label='Dernière position';
 
@@ -401,6 +420,7 @@ function render(){
     $('moreBtn').hidden = showAll || rest.length <= 8;
     $('moreBtn').textContent = `Voir les ${rest.length-8} autres`;
   }
+  if (set.tab==='route') renderRoute();
   if (set.tab==='map') drawMap();
   if (set.tab==='trend') drawTrend();
   if (set.tab==='alert') renderAlert();
@@ -412,7 +432,7 @@ function showTab(t){
   document.body.dataset.tab = t;
   for (const b of document.querySelectorAll('.bnav button')) { if (b.dataset.t===t) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current'); }
   window.scrollTo({top:0});
-  for (const v of ['list','map','trend','alert']) $('v-'+v).hidden = v!==t;
+  for (const v of ['list','route','map','trend','alert']) $('v-'+v).hidden = v!==t;
   render();
 }
 document.querySelector('.bnav').addEventListener('click', e=>{ const b=e.target.closest('button'); if (b) showTab(b.dataset.t); });
@@ -726,6 +746,91 @@ $('carYear').addEventListener('change', ()=>{
   store.set('set',set); carNote(); render();
 });
 
+/* ---------- Trajet ---------- */
+let ROUTE = store.get('route', null);
+async function getRoute(a, b){
+  try {
+    const ctl = new AbortController(); const tm = setTimeout(()=>ctl.abort(), 12000);
+    const r = await fetch(`https://router.project-osrm.org/route/v1/driving/${a.lon},${a.lat};${b.lon},${b.lat}?overview=full&geometries=geojson`, {signal:ctl.signal});
+    clearTimeout(tm);
+    const j = await r.json();
+    if (j.code!=='Ok' || !j.routes || !j.routes[0]) throw new Error('route');
+    let c = j.routes[0].geometry.coordinates.map(([x,y])=>[+y.toFixed(5), +x.toFixed(5)]);
+    if (c.length>4000) { const k=Math.ceil(c.length/4000); c=c.filter((_,i)=>i%k===0 || i===c.length-1); }
+    return {coords:c, km:j.routes[0].distance/1000, min:j.routes[0].duration/60, approx:false};
+  } catch(e) {
+    return {coords:[[a.lat,a.lon],[b.lat,b.lon]], km:hav(a.lat,a.lon,b.lat,b.lon)*1.3, min:null, approx:true};
+  }
+}
+function routeCandidates(){
+  const R = ROUTE, det = set.det||3, c = R.coords;
+  const cum=[0]; for (let i=1;i<c.length;i++) cum.push(cum[i-1]+hav(c[i-1][0],c[i-1][1],c[i][0],c[i][1]));
+  let la0=90, la1=-90, lo0=180, lo1=-180;
+  for (const [la,lo] of c) { la0=Math.min(la0,la); la1=Math.max(la1,la); lo0=Math.min(lo0,lo); lo1=Math.max(lo1,lo); }
+  const dLa = det/110.6, dLo = det/(111.3*Math.cos((la0+la1)/2*Math.PI/180));
+  const out=[];
+  for (const s of S) {
+    if (s.lat<la0-dLa || s.lat>la1+dLa || s.lon<lo0-dLo || s.lon>lo1+dLo) continue;
+    if (!set.costco && /costco/.test(norm(s.b+' '+s.n))) continue;
+    const kx = 111.3*Math.cos(s.lat*Math.PI/180), ky = 110.6;
+    let best=1e9, along=0;
+    for (let i=1;i<c.length;i++) {
+      const ax=(c[i-1][1]-s.lon)*kx, ay=(c[i-1][0]-s.lat)*ky, bx=(c[i][1]-s.lon)*kx, by=(c[i][0]-s.lat)*ky;
+      const vx=bx-ax, vy=by-ay, L2=vx*vx+vy*vy;
+      let t = L2 ? -(ax*vx+ay*vy)/L2 : 0; t=Math.max(0,Math.min(1,t));
+      const dx=ax+t*vx, dy=ay+t*vy, d=Math.sqrt(dx*dx+dy*dy);
+      if (d<best) { best=d; along=cum[i-1]+t*(cum[i]-cum[i-1]); }
+    }
+    if (best>det) continue;
+    const detour = 2*best*1.3;
+    const o = entry(s, best); if (!o) continue;
+    o.dist = best; o.detour = detour; o.along = along;
+    out.push(o);
+  }
+  return out.sort((a,b)=>a.cost-b.cost || a.along-b.along);
+}
+const gmapsVia = (s) => `https://www.google.com/maps/dir/?api=1&origin=${ROUTE.from.lat},${ROUTE.from.lon}&destination=${ROUTE.to.lat},${ROUTE.to.lon}&waypoints=${s.lat},${s.lon}&travelmode=driving`;
+function rtRow(o, avg){
+  return `<li><a href="${gmapsVia(o.s)}" target="_blank" rel="noopener" aria-label="Itinéraire avec arrêt chez ${esc(title(o.s))}">
+    <div><div class="nm">${esc(title(o.s))}</div><div class="ad">à ${Math.round(o.along)} km · détour ${fmt1(o.detour)} km · ${esc(addr(o.s.a))}</div></div>
+    <div class="pr${o.p < avg-0.5 ? ' g' : ''}">${fmt1(o.p)}<small>${o.disc ? 'rabais −'+fmt1(o.disc)+' ¢' : money(o.cost)}</small></div></a>${starBtn(o.s)}</li>`;
+}
+function renderRoute(){
+  $('rtFrom').textContent = ROUTE ? ROUTE.from.label : (pos ? pos.label : 'ta position');
+  if (ROUTE && document.activeElement!==$('rtTo') && !$('rtTo').value) $('rtTo').value = ROUTE.to.label.replace(/ \((centre|secteur)\)$/,'');
+  if (!ROUTE || !S.length) { $('rtHero').innerHTML=''; $('rtList').innerHTML=''; $('rtLh').hidden=true; $('rtNote').textContent=''; return; }
+  const out = routeCandidates(), L=+set.tank||50;
+  const dur = ROUTE.min ? ` · ${Math.floor(ROUTE.min/60)} h ${String(Math.round(ROUTE.min%60)).padStart(2,'0')}` : '';
+  $('rtNote').textContent = `Trajet ${ROUTE.from.label} → ${ROUTE.to.label} : ${Math.round(ROUTE.km)} km${dur}.` + (ROUTE.approx ? ' Le serveur d\'itinéraires ne répondait pas : trajet approximatif en ligne droite.' : ' Itinéraire © OpenStreetMap / OSRM.');
+  if (!out.length) { $('rtHero').innerHTML = `<p class="empty">Aucune station n'affiche de ${FUEL[set.fuel].toLowerCase()} à ${set.det} km ou moins de ta route. Essaie un détour plus grand.</p>`; $('rtList').innerHTML=''; $('rtLh').hidden=true; return; }
+  const t = out[0], avgCost = out.reduce((a,o)=>a+o.cost,0)/out.length, avg = out.reduce((a,o)=>a+o.p,0)/out.length, net = avgCost - t.cost;
+  $('rtHero').innerHTML = `<div class="hero">
+    <p class="lead">Arrête-toi chez</p>
+    <p class="name">${esc(title(t.s))} ${starBtn(t.s)}</p>
+    <p class="addr">${esc(addr(t.s.a))}</p>
+    <p class="price">${fmt1(t.p)}<small> ¢/L</small></p>
+    ${t.disc ? `<p class="rab">Avec ton rabais de ${fmt1(t.disc)} ¢ (affiché ${fmt1(t.p0)} ¢)</p>` : ''}
+    <p class="gain">à ${Math.round(t.along)} km de ton départ · détour ≈ ${fmt1(t.detour)} km${net>=0.05 ? ` · ${money(net)} de moins qu'une station moyenne sur ta route` : ''}</p>
+    <a class="b go" href="${gmapsVia(t.s)}" target="_blank" rel="noopener"><svg class="i" viewBox="0 0 24 24"><path d="M12 18.5l7.3 2.5a.5.5 0 0 0 .6-.7L12 3l-7.9 17.3a.5.5 0 0 0 .6.7z"/></svg>Y aller avec l'arrêt</a>
+    <p class="cost">Plein de ${L} L : ${money(t.cost)}, détour compris · ${out.length} station${out.length>1?'s':''} sur ta route</p></div>`;
+  const rest = out.slice(1, 31);
+  $('rtLh').hidden = !rest.length;
+  $('rtList').innerHTML = rest.map(o=>rtRow(o, avg)).join('');
+}
+$('rtForm').addEventListener('submit', async e=>{
+  e.preventDefault();
+  if (!pos) { $('rtErr').textContent='Choisis d\'abord ton point de départ.'; return; }
+  const to = locate($('rtTo').value);
+  if (!to) { $('rtErr').textContent='Destination introuvable. Essaie une ville du Québec (ex. Québec, Sherbrooke) ou un code postal.'; return; }
+  $('rtErr').textContent='Calcul de l\'itinéraire…';
+  const from = {lat:pos.lat, lon:pos.lon, label:pos.label};
+  const r = await getRoute(from, to);
+  ROUTE = Object.assign(r, {from, to});
+  try { store.set('route', ROUTE); } catch(e) {}
+  $('rtErr').textContent=''; render();
+});
+$('rtFromChg').addEventListener('click', ()=>{ showTab('list'); $('posform').hidden=false; $('q').focus(); });
+
 /* ---------- Favoris ---------- */
 document.addEventListener('click', e=>{
   const b = e.target.closest('[data-fav]'); if (!b) return;
@@ -795,7 +900,7 @@ async function load(){
 }
 document.addEventListener('visibilitychange', ()=>{ if (!document.hidden && Date.now()-loadedAt > 5*60e3) load(); });
 setInterval(()=>{ fresh(); if (!document.hidden && Date.now()-loadedAt > 5*60e3) load(); }, 60e3);
-showTab(['list','map','trend','alert'].includes(set.tab) ? set.tab : 'list');
+showTab(['list','route','map','trend','alert'].includes(set.tab) ? set.tab : 'list');
 load().then(()=>{
   gpsSetup();
   if (alerte.on && Date.now()-alerte.sent > 7*864e5) pushAlerte(true);
