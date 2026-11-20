@@ -21,9 +21,11 @@ permissions:
   pages: write
   id-token: write
 
+# Une nouvelle version de l'appli (push) interrompt la série de mises à jour en cours
+# pour être publiée tout de suite; la série reprend au prochain lancement programmé.
 concurrency:
   group: pages
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'push' }}
 
 env:
   TOURS: ${{ inputs.tours || (github.event_name == 'push' && '1') || '4' }}
