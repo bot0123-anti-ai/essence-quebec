@@ -371,10 +371,9 @@ let map=null, layer=null, leaflet=null;
 function loadLeaflet(){
   if (window.L) return Promise.resolve();
   if (leaflet) return leaflet;
-  leaflet = new Promise((ok,ko)=>{
-    const c=document.createElement('link'); c.rel='stylesheet'; c.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; document.head.appendChild(c);
-    const s=document.createElement('script'); s.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'; s.onload=ok; s.onerror=()=>{ leaflet=null; ko(); }; document.head.appendChild(s);
-  });
+  const css = new Promise(ok=>{ const c=document.createElement('link'); c.rel='stylesheet'; c.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; c.onload=ok; c.onerror=ok; document.head.appendChild(c); });
+  const js = new Promise((ok,ko)=>{ const s=document.createElement('script'); s.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'; s.onload=ok; s.onerror=ko; document.head.appendChild(s); });
+  leaflet = Promise.all([css, js]).catch(e=>{ leaflet=null; throw e; });
   return leaflet;
 }
 async function drawMap(){
@@ -382,13 +381,14 @@ async function drawMap(){
   try { await loadLeaflet(); } catch(e) { $('map').innerHTML='<p class="empty">Carte non disponible : vérifie ta connexion.</p>'; return; }
   if (set.tab!=='map') return;
   if (!map) {
-    map = L.map('map', {zoomControl:true});
+    $('map').innerHTML = '';
+    map = L.map('map', {zoomControl:true}).setView([pos.lat,pos.lon], 13);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, attribution:'&copy; OpenStreetMap'}).addTo(map);
     layer = L.layerGroup().addTo(map);
   }
   map.invalidateSize();
   layer.clearLayers();
-  const ring = L.circle([pos.lat,pos.lon], {radius:set.radius*1000, color:'#d42a1f', weight:1.5, fillOpacity:.04}).addTo(layer);
+  L.circle([pos.lat,pos.lon], {radius:set.radius*1000, color:'#16a34a', weight:1.5, fillOpacity:.05}).addTo(layer);
   L.circleMarker([pos.lat,pos.lon], {radius:8, color:'#fff', weight:3, fillColor:'#1a73e8', fillOpacity:1}).bindPopup('Ta position').addTo(layer);
   if (OUT.length) {
     const low = Math.min(...OUT.map(o=>o.p));
@@ -400,7 +400,8 @@ async function drawMap(){
         .addTo(layer);
     });
   }
-  map.fitBounds(ring.getBounds(), {padding:[8,8]});
+  map.fitBounds(L.latLng(pos.lat,pos.lon).toBounds(set.radius*2000), {padding:[8,8]});
+  setTimeout(()=>map.invalidateSize(), 250);
 }
 
 /* ---------- Tendance ---------- */
