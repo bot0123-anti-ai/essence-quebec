@@ -2,214 +2,213 @@
 <html lang="fr-CA">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Essence au meilleur prix</title>
-<meta name="theme-color" content="#d42a1f">
+<meta name="theme-color" content="#e8590c">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* VOICE: sobre et précis, comme une bonne appli native; l'info d'abord, rien de trop
-   IDEA: l'affichette de prix d'une station, réduite à l'essentiel
-   PICTURE: la fiche du meilleur choix, prix net et lisible; épingles de prix sur la carte
-   COLOUR and TYPE: blanc, encre, gris doux, rouge en accent seulement, vert pour l'économie; Inter, chiffres tabulaires
-   LAYOUT: une colonne au téléphone; fiche et filtres à gauche, onglets à droite sur grand écran */
-:root{color-scheme:light dark;--bg:light-dark(#fff,#0f1012);--ink:light-dark(#111214,#f2f2f3);--mute:light-dark(#6b7076,#9ba0a6);--line:light-dark(#ececee,#26282c);--soft:light-dark(#f4f4f5,#1a1c1f);--card:light-dark(#fff,#151619);--red:light-dark(#d42a1f,#ff5d50);--green:light-dark(#0b7a3a,#41cf7f);--amber:light-dark(#b26a00,#f0a63a);--grey:light-dark(#a3a8ae,#5d636a);--shadow:light-dark(0 1px 2px #0000000f,0 1px 2px #0006)}
+/* VOICE: amical et joyeux, comme une appli grand public; on parle à la personne
+   IDEA: l'affichette de prix jaune d'une station, sur fond orange vif
+   PICTURE: la fiche du meilleur prix qui chevauche le bandeau orange, prix dans un carré jaune
+   COLOUR and TYPE: orange vif, crème, jaune prix; vert/jaune/rouge pour bon/moyen/cher; Nunito arrondie
+   LAYOUT: une colonne façon appli (max 560px), barre d'onglets fixe en bas */
+:root{color-scheme:light dark;--or:light-dark(#e8590c,#c2410c);--bg:light-dark(#fff8ef,#17110d);--card:light-dark(#fff,#241a14);--ink:light-dark(#3a2410,#fbeee0);--mute:light-dark(#8a6a4a,#c7a888);--line:light-dark(#f0dcc4,#3a2c22);--chip:light-dark(#fff,#2b2019);--yel:#ffd23f;--yelink:#4a2c00;
+--g-bg:light-dark(#dff3e4,#16351f);--g-ink:light-dark(#1e5c30,#8fe0a6);--a-bg:light-dark(#fff0cc,#3d2e0a);--a-ink:light-dark(#6b4300,#f6cf72);--r-bg:light-dark(#ffe1dc,#41191a);--r-ink:light-dark(#8a2416,#ff9b8c);--green:light-dark(#1e7a3c,#5fd38a)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;overflow-x:clip;-webkit-font-smoothing:antialiased}
-.num{font-variant-numeric:tabular-nums}
-.wrap{max-width:1100px;margin:0 auto;padding:clamp(14px,3vw,36px) max(4vw,16px) 40px;display:grid;gap:18px}
-header{display:flex;justify-content:space-between;align-items:baseline;gap:6px 16px;flex-wrap:wrap}
-h1{font-size:19px;font-weight:600;letter-spacing:-.01em;margin:0}
-.fresh{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--mute);margin:0}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex:none}
-.fresh.mid .dot{background:var(--amber)}.fresh.old .dot{background:var(--red)}.fresh.old{color:var(--red)}
-.lnk{background:none;border:0;padding:0;font:inherit;color:var(--ink);text-decoration:underline;text-decoration-color:var(--grey);text-underline-offset:3px;cursor:pointer;min-height:32px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Nunito,system-ui,sans-serif;overflow-x:clip;-webkit-font-smoothing:antialiased;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-4px;flex:none}
+.top{background:var(--or);color:#fff;padding:18px 0 50px}
+.in{max-width:560px;margin:0 auto;padding:0 16px}
+.where{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:0;font-size:15px;font-weight:700}
+.where .lnk{color:#fff;font-weight:600;font-size:14px;opacity:.95}
+h1{font-size:26px;font-weight:800;line-height:1.15;margin:4px 0 8px;letter-spacing:-.01em}
+.fresh{display:inline-flex;align-items:center;gap:7px;margin:0;font-size:13px;font-weight:700;background:#ffffff2e;border-radius:99px;padding:4px 11px}
+.dot{width:8px;height:8px;border-radius:50%;background:#7dffa8;flex:none}
+.fresh.mid .dot{background:#ffd23f}.fresh.old{background:#7a1d0e}.fresh.old .dot{background:#ff8a7a}
+.fresh .lnk{color:#fff;font-size:13px;min-height:auto}
+.lnk{background:none;border:0;padding:0;font:inherit;color:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer;min-height:32px}
 .lnk[hidden]{display:none}
-.pos{display:flex;align-items:center;gap:4px 14px;flex-wrap:wrap;font-size:14px}
-.pos .where{color:var(--mute)}.pos .where b{color:var(--ink);font-weight:600}
-form{display:grid;gap:10px;padding:12px;border:1px solid var(--line);border-radius:14px;margin-top:8px}
-form[hidden]{display:none}
+main.in{margin-top:-36px;display:grid;gap:14px}
+.card{background:var(--card);border-radius:22px;padding:16px;box-shadow:0 2px 10px #3a241014}
+form.card{display:grid;gap:10px}form[hidden]{display:none}
 .row{display:flex;gap:8px;flex-wrap:wrap}
-input[type=text],input[type=number],select{font:16px Inter,system-ui,sans-serif;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 12px;min-height:44px;flex:1 1 160px;width:100%}
-.b{display:inline-flex;align-items:center;justify-content:center;font:500 15px Inter,system-ui,sans-serif;min-height:42px;padding:0 16px;border-radius:10px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);cursor:pointer;text-decoration:none}
-.b.o{background:transparent;color:var(--ink);border-color:var(--line)}
-:focus-visible{outline:2px solid var(--red);outline-offset:2px}
-label.ck{display:flex;gap:8px;align-items:center;font-size:14px;min-height:32px}
-.err{color:var(--red);font-size:13px;margin:0}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow)}
-.hero .lab{font-size:13px;font-weight:600;color:var(--red);margin:0}
-.hero .top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-top:4px}
-.price{font-size:44px;font-weight:600;letter-spacing:-.03em;line-height:1;white-space:nowrap;font-variant-numeric:tabular-nums}
-.price small{font-size:14px;font-weight:500;color:var(--mute);letter-spacing:0;margin-left:4px}
-.go{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:99px;border:1px solid var(--line);color:var(--ink);font-weight:500;font-size:14px;text-decoration:none;white-space:nowrap}
-.hero h2{font-size:16px;font-weight:600;margin:12px 0 0}
-.hero .ad{margin:1px 0 0}
-.facts{display:flex;flex-wrap:wrap;gap:2px 8px;margin-top:8px;font-size:14px;color:var(--mute)}
-.facts span{white-space:nowrap}.facts span+span::before{content:"·";margin-right:8px}
-.save{font-size:14px;color:var(--green);font-weight:500;margin:6px 0 0}
-.empty{border:1px dashed var(--line);border-radius:14px;padding:22px 18px;color:var(--mute);margin:0;font-size:14px}
-.ctl{display:grid;gap:12px;margin-top:16px}
-.grp>span{display:block;font-size:12px;color:var(--mute);margin-bottom:5px}
-.seg{display:flex;gap:2px;background:var(--soft);border-radius:10px;padding:3px}
-.seg button{font:500 14px Inter,system-ui,sans-serif;min-height:38px;padding:0 10px;border-radius:8px;border:0;background:transparent;color:var(--mute);cursor:pointer;flex:1 1 0;white-space:nowrap}
-.seg button[aria-pressed=true]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px #0000001f}
-details{border-top:1px solid var(--line);padding-top:8px}
-summary{cursor:pointer;min-height:36px;font-size:14px;font-weight:500;color:var(--mute);display:flex;align-items:center;justify-content:space-between;list-style:none}
+input[type=text],input[type=number],select{font:16px Nunito,system-ui,sans-serif;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:14px;padding:9px 12px;min-height:46px;flex:1 1 150px;width:100%}
+.b{display:inline-flex;align-items:center;justify-content:center;gap:6px;font:800 15px Nunito,system-ui,sans-serif;min-height:46px;padding:0 18px;border-radius:99px;border:0;background:var(--or);color:#fff;cursor:pointer;text-decoration:none}
+.b.o{background:var(--chip);color:var(--ink);border:1.5px solid var(--line)}
+:focus-visible{outline:3px solid var(--yel);outline-offset:2px}
+label.ck{display:flex;gap:8px;align-items:center;font-size:15px;min-height:32px}
+.err{color:var(--r-ink);font-size:14px;margin:0;font-weight:600}
+.hero{display:grid;grid-template-columns:auto minmax(0,1fr);gap:14px;align-items:center}
+.pbox{background:var(--yel);color:var(--yelink);border-radius:18px;padding:12px 14px;text-align:center;min-width:104px}
+.pbox b{display:block;font-size:34px;font-weight:800;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.pbox span{font-size:12px;font-weight:700}
+.hero .lab{margin:0;font-size:12px;font-weight:800;color:var(--or)}
+.hero h2{margin:0;font-size:19px;font-weight:800;line-height:1.2}
+.hero .ad{margin:1px 0 0;font-size:14px;color:var(--mute)}
+.hero .save{margin:6px 0 0;font-size:14px;font-weight:800;color:var(--green)}
+.hero .act{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;border-top:1.5px dashed var(--line);padding-top:12px;font-size:14px;color:var(--mute);font-weight:600}
+.empty{background:var(--card);border-radius:22px;padding:22px 18px;color:var(--mute);margin:0;font-weight:600}
+.filters{display:grid;gap:10px}
+.seg{display:flex;flex-wrap:wrap;gap:6px;padding:2px 0}
+.seg::-webkit-scrollbar{display:none}
+.seg button{font:700 14px Nunito,system-ui,sans-serif;min-height:40px;padding:0 15px;border-radius:99px;border:1.5px solid var(--line);background:var(--chip);color:var(--ink);cursor:pointer;flex:none;white-space:nowrap}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+details.card{padding:4px 16px}
+summary{cursor:pointer;min-height:44px;font-weight:800;display:flex;align-items:center;justify-content:space-between;list-style:none}
 summary::-webkit-details-marker{display:none}
-summary::after{content:"+";font-size:18px;font-weight:400}details[open] summary::after{content:"–"}
-details[open] summary{color:var(--ink)}
-.opt{display:grid;gap:12px;margin-top:6px}
-.swrow{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:14px}
-label.f{display:grid;gap:4px;font-size:12px;color:var(--mute);flex:1 1 140px}
-h3{font-size:16px;font-weight:600;margin:0 0 2px}
-.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:12px;overflow-x:auto}
-.tabs button{font:500 14px Inter,system-ui,sans-serif;background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;padding:0 12px;min-height:44px;color:var(--mute);cursor:pointer;flex:1 0 auto}
-.tabs button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--ink)}
-.list{list-style:none;margin:0;padding:0}
-.list li{border-bottom:1px solid var(--line)}
-.list a.row{display:grid;grid-template-columns:62px minmax(0,1fr) auto 12px;gap:2px 12px;align-items:center;padding:11px 0;color:inherit;text-decoration:none}
-.list a.row::after{content:"›";color:var(--grey);font-size:20px;line-height:1}
-.pr{font-size:19px;font-weight:600;letter-spacing:-.02em;white-space:nowrap;font-variant-numeric:tabular-nums}
-.nm{font-weight:500;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nm small{font-weight:400;color:var(--mute);font-size:13px}
-.ad{color:var(--mute);font-size:13px}
+summary::after{content:"+";font-size:22px;color:var(--or)}details[open] summary::after{content:"–"}
+.opt{display:grid;gap:12px;padding:4px 0 14px}
+.swrow{display:flex;justify-content:space-between;align-items:center;gap:12px;font-weight:600}
+label.f{display:grid;gap:4px;font-size:13px;color:var(--mute);font-weight:700;flex:1 1 140px}
+h3{font-size:19px;font-weight:800;margin:0}
+.sub{color:var(--mute);font-size:14px;margin:2px 0 10px;font-weight:600}
+.list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.list a{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 12px;align-items:center;background:var(--card);border-radius:16px;padding:10px 12px;color:inherit;text-decoration:none;box-shadow:0 1px 4px #3a24100d}
+.tagp{font-size:16px;font-weight:800;padding:4px 9px;border-radius:10px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.t-g{background:var(--g-bg);color:var(--g-ink)}.t-a{background:var(--a-bg);color:var(--a-ink)}.t-r{background:var(--r-bg);color:var(--r-ink)}
+.nm{font-weight:800;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ad{color:var(--mute);font-size:13px;font-weight:600}
 .list .ad{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rt{text-align:right;font-size:14px;white-space:nowrap;font-variant-numeric:tabular-nums}
-.rt small{display:block;color:var(--mute);font-size:12px}
-
-.note{color:var(--mute);font-size:12px;margin:10px 0 0}
+.rt{text-align:right;font-size:14px;font-weight:800;white-space:nowrap}
+.rt small{display:block;color:var(--mute);font-size:12px;font-weight:600}
+.note{color:var(--mute);font-size:12px;margin:6px 0 0;font-weight:600}
 #status:empty{display:none}
-#status,.msg{background:var(--soft);border-radius:10px;padding:10px 12px;font-size:13px;margin:12px 0 0}
-.msg:empty{display:none}
-#map{height:min(66vh,540px);border-radius:14px;border:1px solid var(--line);background:var(--soft);z-index:0}
-.pin{display:inline-block;transform:translate(-50%,-120%);background:#fff;color:#111214;border:1px solid #d9d9dc;border-radius:7px;padding:1px 6px;font:600 12px/1.35 Inter,system-ui,sans-serif;white-space:nowrap;box-shadow:0 1px 3px #0003;font-variant-numeric:tabular-nums}
-.pin.low{color:#0b7a3a;border-color:#0b7a3a}
-.pin.best{background:#d42a1f;color:#fff;border-color:#d42a1f;font-size:13px}
-.leaflet-popup-content{font:13px/1.5 Inter,system-ui,sans-serif}
-.leaflet-popup-content a{color:#d42a1f;font-weight:600}
+#status,.msg{background:var(--a-bg);color:var(--a-ink);border-radius:14px;padding:10px 12px;font-size:14px;margin:0;font-weight:700}
+.msg{margin-top:12px}.msg:empty{display:none}
+#map{height:min(62vh,520px);border-radius:22px;overflow:hidden;background:var(--card);z-index:0}
+.pin{display:inline-block;transform:translate(-50%,-120%);background:#fff;color:#3a2410;border:2px solid #f0dcc4;border-radius:10px;padding:1px 7px;font:800 13px/1.35 Nunito,system-ui,sans-serif;white-space:nowrap;box-shadow:0 1px 4px #0003}
+.pin.low{background:#dff3e4;color:#1e5c30;border-color:#1e5c30}
+.pin.best{background:#ffd23f;color:#4a2c00;border-color:#e8590c;font-size:15px}
+.leaflet-popup-content{font:600 14px/1.5 Nunito,system-ui,sans-serif}.leaflet-popup-content a{color:#e8590c;font-weight:800}
 .kpi{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px;margin-top:6px}
-.kpi .v{font-size:32px;font-weight:600;letter-spacing:-.03em;line-height:1.1;white-space:nowrap;font-variant-numeric:tabular-nums}
-.kpi .d{font-size:14px;font-weight:500;white-space:nowrap}
-.up{color:var(--red)}.down{color:var(--green)}
-.verdict{background:var(--soft);border-radius:10px;padding:10px 12px;margin:12px 0 0;font-size:14px}
-.fig{position:relative;height:230px;margin-top:12px}.fig>svg{position:absolute;inset:0;width:100%;height:100%;color:var(--ink)}
-.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--mute);margin-top:6px}
-.legend i{display:inline-block;width:16px;height:2px;vertical-align:middle;margin-right:6px;border-radius:2px}
+.kpi .v{font-size:36px;font-weight:800;line-height:1.1;white-space:nowrap;font-variant-numeric:tabular-nums}
+.kpi .d{font-size:15px;font-weight:800;white-space:nowrap}
+.up{color:var(--r-ink)}.down{color:var(--green)}
+.verdict{background:var(--a-bg);color:var(--a-ink);border-radius:14px;padding:10px 12px;margin:12px 0 0;font-size:15px;font-weight:700}
+.fig{position:relative;height:220px;margin-top:12px}.fig>svg{position:absolute;inset:0;width:100%;height:100%;color:var(--ink)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--mute);margin-top:6px;font-weight:700}
+.legend i{display:inline-block;width:16px;height:3px;vertical-align:middle;margin-right:6px;border-radius:2px}
+#rng{margin-top:12px}
 .alhead{display:flex;justify-content:space-between;align-items:center;gap:16px}
-.sw{flex:none;width:46px;height:28px;border-radius:99px;border:0;background:var(--line);position:relative;cursor:pointer}
-.sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0004;transition:left .15s}
-.sw[aria-checked=true]{background:var(--green)}.sw[aria-checked=true]::after{left:21px}
+.sw{flex:none;width:52px;height:32px;border-radius:99px;border:0;background:var(--line);position:relative;cursor:pointer}
+.sw::after{content:"";position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #0004;transition:left .15s}
+.sw[aria-checked=true]{background:#1e7a3c}.sw[aria-checked=true]::after{left:24px}
 .grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:14px}
-ol.steps{padding-left:20px;margin:14px 0 0;display:grid;gap:12px;font-size:14px}
-ol.steps a:not(.b){color:var(--ink);font-weight:500}
-code{background:var(--soft);border-radius:6px;padding:1px 6px;overflow-wrap:anywhere;font-size:13px}
-@media(max-width:400px){.list a.row{grid-template-columns:54px minmax(0,1fr) auto 10px;gap:2px 10px}.pr{font-size:17px}.tabs button{padding:0 8px}.price{font-size:40px}}
-@media(min-width:900px){.wrap{grid-template-columns:360px minmax(0,1fr);align-items:start;column-gap:44px}.side{position:sticky;top:20px}header{grid-column:1/-1}}
-@media(prefers-reduced-motion:no-preference){.hero{animation:up .3s ease-out}@keyframes up{from{opacity:0;transform:translateY(6px)}}}
+ol.steps{padding-left:20px;margin:14px 0 0;display:grid;gap:12px;font-weight:600}
+ol.steps a:not(.b){color:var(--or);font-weight:800}
+code{background:var(--bg);border-radius:8px;padding:1px 6px;overflow-wrap:anywhere;font-size:14px}
+.bnav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1.5px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:10}
+.bnav .in{display:flex;justify-content:space-around;padding:0 6px}
+.bnav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;padding:8px 0 9px;min-height:60px;font:800 12px Nunito,system-ui,sans-serif;color:var(--mute);cursor:pointer}
+.bnav button svg.i{width:24px;height:24px}
+.bnav button[aria-current=page]{color:var(--or)}
+body[data-tab=trend] .hide-trend,body[data-tab=alert] .hide-alert{display:none}
+@media(prefers-reduced-motion:no-preference){#hero>.card{animation:up .3s ease-out}@keyframes up{from{opacity:0;transform:translateY(6px)}}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1>Essence au meilleur prix</h1>
+<header class="top">
+  <div class="in">
+    <p class="where"><svg class="i" viewBox="0 0 24 24"><path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0-6 0"/><path d="M17.66 16.66l-4.24 4.24a2 2 0 0 1-2.83 0l-4.25-4.24a8 8 0 1 1 11.32 0z"/></svg><span id="poslbl">…</span>
+      <button class="lnk" id="gps" type="button" hidden>Me localiser</button>
+      <button class="lnk" id="homeBtn" type="button" hidden>Chez moi</button>
+      <button class="lnk" id="chg" type="button">Changer</button></p>
+    <h1>Fais le plein malin</h1>
     <p class="fresh" id="freshBox"><span class="dot"></span><span id="fresh">Chargement des prix…</span>
       <label class="lnk" for="file" id="impLbl" hidden>Importer</label>
       <input type="file" id="file" accept=".xlsx,.xls,.csv" hidden></p>
-  </header>
+  </div>
+</header>
 
-  <div class="side">
-    <div class="pos" id="posbar">
-      <span class="where">Autour de <b id="poslbl">…</b></span>
-      <button class="lnk" id="gps" type="button" hidden>Me localiser</button>
-      <button class="lnk" id="homeBtn" type="button" hidden>Chez moi</button>
-      <button class="lnk" id="chg" type="button">Changer</button>
+<main class="in">
+  <form id="posform" class="card" hidden>
+    <div class="row">
+      <input type="text" id="q" list="cities" placeholder="Code postal ou ville (ex. H7N 1A1)" autocomplete="off">
+      <button class="b" type="submit">OK</button>
     </div>
-    <form id="posform" hidden>
-      <div class="row">
-        <input type="text" id="q" list="cities" placeholder="Code postal ou ville (ex. H7N 1A1)" autocomplete="off">
-        <button class="b" type="submit">OK</button>
-      </div>
-      <label class="ck"><input type="checkbox" id="setHome"> C'est chez moi</label>
-      <p class="err" id="perr"></p>
-      <datalist id="cities"></datalist>
-    </form>
+    <label class="ck"><input type="checkbox" id="setHome"> C'est chez moi</label>
+    <p class="err" id="perr"></p>
+    <datalist id="cities"></datalist>
+  </form>
 
-    <p id="status" role="status"></p>
-    <div id="hero" style="margin-top:12px"></div>
+  <p id="status" role="status"></p>
+  <div id="hero" class="hide-trend hide-alert"></div>
 
-    <div class="ctl">
-      <div class="grp"><span>Carburant</span><div class="seg" data-k="fuel">
-        <button type="button" data-v="0">Régulier</button><button type="button" data-v="1">Super</button><button type="button" data-v="2">Diesel</button></div></div>
-      <div class="grp"><span>Rayon</span><div class="seg" data-k="radius">
-        <button type="button" data-v="3">3 km</button><button type="button" data-v="5">5 km</button><button type="button" data-v="10">10 km</button><button type="button" data-v="25">25 km</button></div></div>
-      <div class="grp"><span>Trier par</span><div class="seg" data-k="sort">
-        <button type="button" data-v="best">Meilleur choix</button><button type="button" data-v="price">Prix</button><button type="button" data-v="dist">Distance</button></div></div>
-      <details>
-        <summary>Options</summary>
-        <div class="opt">
-          <div class="swrow"><span>Inclure Costco <span class="ad">(membres seulement)</span></span><button class="sw" id="costcoSw" role="switch" aria-checked="true" aria-label="Inclure Costco" type="button"></button></div>
-          <div class="row">
-            <label class="f">Plein (litres)<input type="number" id="tank" min="10" max="200" step="1"></label>
-            <label class="f">Consommation (L/100 km)<input type="number" id="cons" min="2" max="30" step="0.1"></label>
-          </div>
-          <p class="note" style="margin:0">« Meilleur choix » compte le prix du plein et l'essence brûlée pour l'aller-retour (distance à vol d'oiseau × 1,3).</p>
-        </div>
-      </details>
-    </div>
+  <div class="filters hide-alert">
+    <div class="seg" data-k="fuel" aria-label="Carburant">
+      <button type="button" data-v="0">Régulier</button><button type="button" data-v="1">Super</button><button type="button" data-v="2">Diesel</button></div>
+    <div class="seg hide-trend" data-k="radius" aria-label="Rayon">
+      <button type="button" data-v="3">3 km</button><button type="button" data-v="5">5 km</button><button type="button" data-v="10">10 km</button><button type="button" data-v="25">25 km</button></div>
+    <div class="seg hide-trend" data-k="sort" aria-label="Trier par">
+      <button type="button" data-v="best">Meilleur choix</button><button type="button" data-v="price">Moins cher</button><button type="button" data-v="dist">Plus proche</button></div>
   </div>
 
-  <section>
-    <div class="tabs" role="tablist">
-      <button role="tab" data-t="list" aria-selected="true">Liste</button>
-      <button role="tab" data-t="map" aria-selected="false">Carte</button>
-      <button role="tab" data-t="trend" aria-selected="false">Tendance</button>
-      <button role="tab" data-t="alert" aria-selected="false">Alerte</button>
-    </div>
+  <div id="v-list">
+    <h3 id="lh">Autres stations</h3>
+    <p class="sub" id="lsub"></p>
+    <ul class="list" id="list"></ul>
+  </div>
 
-    <div id="v-list">
-      <h3 id="lh">Autres stations</h3>
-      <p class="note" id="lsub" style="margin:0 0 6px"></p>
-      <ul class="list" id="list"></ul>
-    </div>
+  <div id="v-map" hidden>
+    <div id="map"></div>
+    <p class="note">Touche un prix pour l'adresse et l'itinéraire. En jaune : le meilleur choix; en vert : le moins cher du coin.</p>
+  </div>
 
-    <div id="v-map" hidden>
-      <div id="map"></div>
-      <p class="note">Touche une épingle pour l'adresse et l'itinéraire. En rouge : le meilleur choix; en vert : le prix le plus bas du secteur.</p>
-    </div>
+  <div id="v-trend" class="card" hidden>
+    <h3 id="th">Tendance</h3>
+    <div id="tbody"></div>
+  </div>
 
-    <div id="v-trend" hidden>
-      <h3 id="th">Tendance</h3>
-      <div id="tbody"></div>
+  <div id="v-alert" class="card" hidden>
+    <div class="alhead">
+      <div><h3>Alerte de prix</h3><p class="sub" style="margin:2px 0 0">On t'avertit quand une station proche passe sous ton prix.</p></div>
+      <button class="sw" id="alOn" role="switch" aria-checked="false" aria-label="Activer l'alerte de prix"></button>
     </div>
+    <div class="grid3">
+      <label class="f">Carburant<select id="alF"><option value="0">Régulier</option><option value="1">Super</option><option value="2">Diesel</option></select></label>
+      <label class="f">Prix maximum (¢/L)<input type="number" id="alS" min="50" max="400" step="0.1" inputmode="decimal"></label>
+      <label class="f">Rayon<select id="alR"><option value="3">3 km</option><option value="5">5 km</option><option value="10">10 km</option><option value="25">25 km</option></select></label>
+    </div>
+    <p class="note">Zone : <b id="alZone">—</b> · <button class="lnk" id="alHere" type="button">Utiliser la position affichée</button></p>
+    <p class="msg" id="alMsg" role="status"></p>
+    <div id="alSetup" hidden>
+      <ol class="steps">
+        <li>Installe l'appli gratuite <b>ntfy</b> : <a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy" target="_blank" rel="noopener">Android</a> · <a href="https://apps.apple.com/us/app/ntfy/id1625396347" target="_blank" rel="noopener">iPhone</a></li>
+        <li><a class="b" id="alSub" href="#">S'abonner à mes alertes</a><br><span class="note">Sur iPhone, si le bouton ne marche pas : dans ntfy, touche <b>+</b> et entre ce nom : <code id="alTopic"></code> <button class="lnk" id="alCopy" type="button">Copier</button></span></li>
+        <li><button class="b o" id="alTest" type="button">Envoyer une notification test</button></li>
+      </ol>
+    </div>
+    <p class="note">Vérifiée aux 15 minutes, une seule notification par baisse sous ton prix. Ta zone est arrondie à environ 2 km; aucun nom ni courriel n'est envoyé. L'alerte reste active tant que tu ouvres l'appli au moins une fois tous les 3 mois.</p>
+  </div>
 
-    <div id="v-alert" hidden>
-      <div class="alhead">
-        <div><h3>Alerte de prix</h3><p class="note" style="margin:0">Une notification sur ton téléphone quand une station proche passe sous ton prix.</p></div>
-        <button class="sw" id="alOn" role="switch" aria-checked="false" aria-label="Activer l'alerte de prix"></button>
+  <details class="card hide-trend hide-alert">
+    <summary>Options</summary>
+    <div class="opt">
+      <div class="swrow"><span>Inclure Costco <span class="ad">(membres seulement)</span></span><button class="sw" id="costcoSw" role="switch" aria-checked="true" aria-label="Inclure Costco" type="button"></button></div>
+      <div class="row">
+        <label class="f">Plein (litres)<input type="number" id="tank" min="10" max="200" step="1"></label>
+        <label class="f">Consommation (L/100 km)<input type="number" id="cons" min="2" max="30" step="0.1"></label>
       </div>
-      <div class="grid3">
-        <label class="f">Carburant<select id="alF"><option value="0">Régulier</option><option value="1">Super</option><option value="2">Diesel</option></select></label>
-        <label class="f">Prix maximum (¢/L)<input type="number" id="alS" min="50" max="400" step="0.1" inputmode="decimal"></label>
-        <label class="f">Rayon<select id="alR"><option value="3">3 km</option><option value="5">5 km</option><option value="10">10 km</option><option value="25">25 km</option></select></label>
-      </div>
-      <p class="note">Zone : <b id="alZone">—</b> · <button class="lnk" id="alHere" type="button">Utiliser la position affichée</button></p>
-      <p class="msg" id="alMsg" role="status"></p>
-      <div id="alSetup" hidden>
-        <ol class="steps">
-          <li>Installe l'appli gratuite <b>ntfy</b> : <a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy" target="_blank" rel="noopener">Android</a> · <a href="https://apps.apple.com/us/app/ntfy/id1625396347" target="_blank" rel="noopener">iPhone</a></li>
-          <li><a class="b" id="alSub" href="#">S'abonner à mes alertes</a><br><span class="note">Si le bouton ne marche pas (iPhone) : dans ntfy, touche <b>+</b> et entre ce nom : <code id="alTopic"></code> <button class="lnk" id="alCopy" type="button">Copier</button></span></li>
-          <li><button class="b o" id="alTest" type="button">Envoyer une notification test</button></li>
-        </ol>
-      </div>
-      <p class="note">L'alerte est vérifiée aux 15 minutes et n'envoie qu'une notification par baisse sous ton prix. Ta zone est arrondie à environ 2 km; aucun nom ni courriel n'est envoyé. Elle reste active tant que tu ouvres l'appli au moins une fois tous les 3 mois.</p>
+      <p class="note" style="margin:0">« Meilleur choix » compte le prix du plein et l'essence brûlée pour l'aller-retour (distance à vol d'oiseau × 1,3).</p>
     </div>
+  </details>
 
-    <p class="note">Source : Régie de l'énergie du Québec, prix récupérés aux 15 minutes. Les stations qui vendent moins de 500 000 L par an ne sont pas tenues d'afficher leurs prix.</p>
-  </section>
-</div>
+  <p class="note">Prix de la Régie de l'énergie du Québec. Les stations qui vendent moins de 500 000 L par an ne sont pas tenues d'afficher leurs prix.</p>
+</main>
+
+<nav class="bnav" aria-label="Sections">
+  <div class="in">
+    <button type="button" data-t="list"><svg class="i" viewBox="0 0 24 24"><path d="M5 12H3l9-9l9 9h-2"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/><path d="M9 21v-6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v6"/></svg>Accueil</button>
+    <button type="button" data-t="map"><svg class="i" viewBox="0 0 24 24"><path d="M3 7l6-3l6 3l6-3v13l-6 3l-6-3l-6 3V7"/><path d="M9 4v13"/><path d="M15 7v13"/></svg>Carte</button>
+    <button type="button" data-t="trend"><svg class="i" viewBox="0 0 24 24"><path d="M4 19h16"/><path d="M4 15l4-6l4 2l4-5l4 4"/></svg>Tendance</button>
+    <button type="button" data-t="alert"><svg class="i" viewBox="0 0 24 24"><path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3H4a4 4 0 0 0 2-3v-3a7 7 0 0 1 4-6"/><path d="M9 17v1a3 3 0 0 0 6 0v-1"/></svg>Alerte</button>
+  </div>
+</nav>
 
 <script>
 {
@@ -252,7 +251,7 @@ function fresh(){
   const d = new Date(TS), today = new Date().toDateString()===d.toDateString();
   const at = d.toLocaleTimeString('fr-CA',{hour:'numeric',minute:'2-digit'});
   const ago = min<1 ? "à l'instant" : min<60 ? `il y a ${min} min` : min<1440 ? `il y a ${Math.floor(min/60)} h ${String(min%60).padStart(2,'0')}` : `le ${d.toLocaleDateString('fr-CA',{day:'numeric',month:'short'})}`;
-  $('fresh').textContent = `Mis à jour ${today?'à '+at:''} · ${ago}`.replace('Mis à jour  · ','Mis à jour ');
+  $('fresh').textContent = min<1440 ? `Mis à jour ${ago} · ${at}` : `Prix du ${d.toLocaleDateString('fr-CA',{day:'numeric',month:'short'})}`;
   $('freshBox').className = 'fresh' + (min>120 ? ' old' : min>45 ? ' mid' : '');
   $('impLbl').hidden = min<=120;
 }
@@ -328,17 +327,16 @@ function render(){
     const t=out[0], save=(avg-t.p)/100*L;
     const tag = {best:'Meilleur choix',price:'Le moins cher',dist:'Le plus proche'}[set.sort];
     $('hero').innerHTML = `<div class="card hero">
-      <p class="lab">${tag} · ${FUEL[set.fuel]}</p>
-      <div class="top"><div class="price">${fmt1(t.p)}<small>¢/L</small></div><a class="go" href="${maps(t.s)}" target="_blank" rel="noopener">Itinéraire</a></div>
-      <h2>${esc(title(t.s))}</h2>
-      <p class="ad">${esc(addr(t.s.a))}</p>
-      <div class="facts num"><span>${km(t.d)}</span><span>Plein de ${L} L : ${money(t.cost)}</span></div>
-      ${save>=0.05 ? `<p class="save num">${money(save)} de moins que la moyenne du secteur (${fmt1(avg)} ¢)</p>` : `<p class="facts num">Moyenne du secteur : ${fmt1(avg)} ¢</p>`}</div>`;
+      <div class="pbox"><b>${fmt1(t.p)}</b><span>¢ le litre</span></div>
+      <div><p class="lab">${tag} · ${FUEL[set.fuel]}</p><h2>${esc(title(t.s))}</h2><p class="ad">${esc(addr(t.s.a))}</p>
+        ${save>=0.05 ? `<p class="save">▼ ${money(save)} de moins sur un plein</p>` : ''}</div>
+      <div class="act"><span>${km(t.d)} de toi · plein ${money(t.cost)}</span><a class="b" href="${maps(t.s)}" target="_blank" rel="noopener"><svg class="i" viewBox="0 0 24 24"><path d="M12 18.5l7.3 2.5a.5.5 0 0 0 .6-.7L12 3l-7.9 17.3a.5.5 0 0 0 .6.7z"/></svg>Y aller</a></div></div>`;
     const rest = out.slice(1, 61);
     $('lh').textContent = rest.length ? 'Autres stations' : 'Aucune autre station';
-    $('lsub').textContent = `${out.length} station${out.length>1?'s':''} dans ${set.radius} km` + (out.length>61 ? ' · 60 premières affichées' : '') + ' · touche une station pour l\'itinéraire';
-    $('list').innerHTML = rest.map(o=>`<li><a class="row" href="${maps(o.s)}" target="_blank" rel="noopener" aria-label="Itinéraire vers ${esc(title(o.s))}, ${esc(addr(o.s.a))}">
-      <div class="pr">${fmt1(o.p)}</div>
+    $('lsub').textContent = `${out.length} station${out.length>1?'s':''} à ${set.radius} km · vert = bon prix` + (out.length>61 ? ' · 60 premières' : '');
+    const tagc = p => p < avg-0.5 ? 't-g' : p > avg+0.5 ? 't-r' : 't-a';
+    $('list').innerHTML = rest.map(o=>`<li><a href="${maps(o.s)}" target="_blank" rel="noopener" aria-label="Itinéraire vers ${esc(title(o.s))}, ${esc(addr(o.s.a))}">
+      <span class="tagp ${tagc(o.p)}">${fmt1(o.p)}</span>
       <div><div class="nm">${esc(title(o.s))}</div><div class="ad">${esc(addr(o.s.a))}</div></div>
       <div class="rt">${km(o.d)}<small>${money(o.cost)}</small></div></a></li>`).join('');
   }
@@ -350,11 +348,13 @@ function render(){
 /* ---------- Onglets ---------- */
 function showTab(t){
   set.tab=t; store.set('set',set);
-  for (const b of document.querySelectorAll('.tabs button')) b.setAttribute('aria-selected', String(b.dataset.t===t));
+  document.body.dataset.tab = t;
+  for (const b of document.querySelectorAll('.bnav button')) { if (b.dataset.t===t) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current'); }
+  window.scrollTo({top:0});
   for (const v of ['list','map','trend','alert']) $('v-'+v).hidden = v!==t;
   render();
 }
-document.querySelector('.tabs').addEventListener('click', e=>{ const b=e.target.closest('button'); if (b) showTab(b.dataset.t); });
+document.querySelector('.bnav').addEventListener('click', e=>{ const b=e.target.closest('button'); if (b) showTab(b.dataset.t); });
 
 /* ---------- Carte ---------- */
 let map=null, layer=null, leaflet=null;
