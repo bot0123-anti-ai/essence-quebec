@@ -9,112 +9,121 @@
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-/* VOICE: utilitaire, direct, lisible d'un coup d'œil (à l'arrêt)
-   IDEA: le pylône de prix d'une station-service
-   PICTURE: le panneau rouge du meilleur choix, chiffres géants; épingles de prix sur la carte
-   COLOUR and TYPE: blanc, encre, rouge pylône, jaune économie; Barlow Condensed + Barlow
-   LAYOUT: une colonne au téléphone; panneau collant à gauche, onglets à droite sur grand écran */
-:root{color-scheme:light dark;--bg:light-dark(#fff,#111315);--ink:light-dark(#16181b,#f1f1ee);--mute:light-dark(#5b6068,#a3a8ae);--line:light-dark(#e3e4e6,#2b2e33);--chip:light-dark(#f3f4f5,#1c1f23);--red:light-dark(#d42a1f,#c4271d);--post:light-dark(#3a3d42,#4a4e54);--yel:#ffd23f;--grey:light-dark(#9aa0a6,#6b7178)}
+/* VOICE: sobre et précis, comme une bonne appli native; l'info d'abord, rien de trop
+   IDEA: l'affichette de prix d'une station, réduite à l'essentiel
+   PICTURE: la fiche du meilleur choix, prix net et lisible; épingles de prix sur la carte
+   COLOUR and TYPE: blanc, encre, gris doux, rouge en accent seulement, vert pour l'économie; Inter, chiffres tabulaires
+   LAYOUT: une colonne au téléphone; fiche et filtres à gauche, onglets à droite sur grand écran */
+:root{color-scheme:light dark;--bg:light-dark(#fff,#0f1012);--ink:light-dark(#111214,#f2f2f3);--mute:light-dark(#6b7076,#9ba0a6);--line:light-dark(#ececee,#26282c);--soft:light-dark(#f4f4f5,#1a1c1f);--card:light-dark(#fff,#151619);--red:light-dark(#d42a1f,#ff5d50);--green:light-dark(#0b7a3a,#41cf7f);--amber:light-dark(#b26a00,#f0a63a);--grey:light-dark(#a3a8ae,#5d636a);--shadow:light-dark(0 1px 2px #0000000f,0 1px 2px #0006)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Barlow,system-ui,sans-serif;overflow-x:clip}
-.wrap{max-width:1240px;margin:0 auto;padding:clamp(16px,3vw,40px) max(4vw,16px) 48px;display:grid;gap:22px}
-h1{font:700 34px/1.05 "Barlow Condensed",sans-serif;margin:0;text-wrap:balance}
-.meta{color:var(--mute);font-size:14px;margin:4px 0 0;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center}
-.meta.stale #fresh{color:var(--red);font-weight:600}
-.lnk{background:none;border:0;padding:0;font:inherit;color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer;min-height:32px}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;overflow-x:clip;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:1100px;margin:0 auto;padding:clamp(14px,3vw,36px) max(4vw,16px) 40px;display:grid;gap:18px}
+header{display:flex;justify-content:space-between;align-items:baseline;gap:6px 16px;flex-wrap:wrap}
+h1{font-size:19px;font-weight:600;letter-spacing:-.01em;margin:0}
+.fresh{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--mute);margin:0}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex:none}
+.fresh.mid .dot{background:var(--amber)}.fresh.old .dot{background:var(--red)}.fresh.old{color:var(--red)}
+.lnk{background:none;border:0;padding:0;font:inherit;color:var(--ink);text-decoration:underline;text-decoration-color:var(--grey);text-underline-offset:3px;cursor:pointer;min-height:32px}
 .lnk[hidden]{display:none}
-.pos{display:flex;align-items:center;gap:6px 14px;flex-wrap:wrap}
-.pos b{font-weight:600}
-.pos small{display:block;color:var(--mute);font-size:13px}
-form{display:grid;gap:10px;padding:14px;border:1px solid var(--line);border-radius:14px;margin-top:10px}
+.pos{display:flex;align-items:center;gap:4px 14px;flex-wrap:wrap;font-size:14px}
+.pos .where{color:var(--mute)}.pos .where b{color:var(--ink);font-weight:600}
+form{display:grid;gap:10px;padding:12px;border:1px solid var(--line);border-radius:14px;margin-top:8px}
 form[hidden]{display:none}
 .row{display:flex;gap:8px;flex-wrap:wrap}
-input[type=text],input[type=number],select{font:16px Barlow,sans-serif;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:44px;flex:1 1 160px;width:100%}
-.b{display:inline-flex;align-items:center;justify-content:center;font:600 16px Barlow,sans-serif;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);cursor:pointer;text-decoration:none}
+input[type=text],input[type=number],select{font:16px Inter,system-ui,sans-serif;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 12px;min-height:44px;flex:1 1 160px;width:100%}
+.b{display:inline-flex;align-items:center;justify-content:center;font:500 15px Inter,system-ui,sans-serif;min-height:42px;padding:0 16px;border-radius:10px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);cursor:pointer;text-decoration:none}
 .b.o{background:transparent;color:var(--ink);border-color:var(--line)}
-:focus-visible{outline:3px solid var(--yel);outline-offset:2px}
-label.ck{display:flex;gap:8px;align-items:center;font-size:15px;min-height:32px}
-.err{color:var(--red);font-size:14px;margin:0}
-.sign{position:relative;background:var(--red);color:#fff;border-radius:18px;padding:18px 20px 20px;margin-bottom:22px}
-.sign::after{content:"";position:absolute;left:50%;bottom:-22px;width:30px;height:22px;background:var(--post);transform:translateX(-50%);border-radius:0 0 3px 3px}
-.tag{display:inline-block;background:var(--yel);color:#16181b;font-weight:600;font-size:14px;border-radius:99px;padding:2px 10px}
-.big{font:700 clamp(84px,24vw,128px)/.9 "Barlow Condensed",sans-serif;margin:10px 0 6px;letter-spacing:-.01em;white-space:nowrap}
-.big span{font-size:.28em;margin-left:6px;letter-spacing:0}
-.sign h2{font:600 22px/1.2 Barlow,sans-serif;margin:0}
-.sign p{margin:2px 0 0;opacity:.92}
-.facts{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:12px;font-weight:500}
-.facts span{white-space:nowrap}
-.save{margin-top:12px}
-.go{display:inline-flex;align-items:center;margin-top:14px;min-height:44px;padding:0 18px;border-radius:10px;background:#fff;color:#a51f16;font-weight:600;text-decoration:none}
-.empty{border:2px dashed var(--line);border-radius:18px;padding:28px 20px;color:var(--mute);margin:0}
-.ctl{display:grid;gap:14px}
-.grp>span{display:block;font-size:13px;color:var(--mute);margin-bottom:6px}
-.seg{display:flex;flex-wrap:wrap;gap:6px}
-.seg button{font:500 15px Barlow,sans-serif;min-height:44px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--chip);color:var(--ink);cursor:pointer;flex:1 0 auto}
-.seg button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-details{border-top:1px solid var(--line);padding-top:10px}
-summary{cursor:pointer;min-height:36px;font-weight:500}
-details .row{margin-top:8px}
-label.f{display:grid;gap:4px;font-size:13px;color:var(--mute);flex:1 1 140px}
-h3{font:700 24px/1.1 "Barlow Condensed",sans-serif;margin:0 0 4px}
-.tabs{display:flex;gap:4px;border-bottom:2px solid var(--line);margin-bottom:14px;overflow-x:auto}
-.tabs button{font:600 16px Barlow,sans-serif;background:none;border:0;border-bottom:3px solid transparent;margin-bottom:-2px;padding:0 14px;min-height:46px;color:var(--mute);cursor:pointer;flex:1 0 auto}
-.tabs button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--red)}
+:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+label.ck{display:flex;gap:8px;align-items:center;font-size:14px;min-height:32px}
+.err{color:var(--red);font-size:13px;margin:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow)}
+.hero .lab{font-size:13px;font-weight:600;color:var(--red);margin:0}
+.hero .top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-top:4px}
+.price{font-size:44px;font-weight:600;letter-spacing:-.03em;line-height:1;white-space:nowrap;font-variant-numeric:tabular-nums}
+.price small{font-size:14px;font-weight:500;color:var(--mute);letter-spacing:0;margin-left:4px}
+.go{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:99px;border:1px solid var(--line);color:var(--ink);font-weight:500;font-size:14px;text-decoration:none;white-space:nowrap}
+.hero h2{font-size:16px;font-weight:600;margin:12px 0 0}
+.hero .ad{margin:1px 0 0}
+.facts{display:flex;flex-wrap:wrap;gap:2px 8px;margin-top:8px;font-size:14px;color:var(--mute)}
+.facts span{white-space:nowrap}.facts span+span::before{content:"·";margin-right:8px}
+.save{font-size:14px;color:var(--green);font-weight:500;margin:6px 0 0}
+.empty{border:1px dashed var(--line);border-radius:14px;padding:22px 18px;color:var(--mute);margin:0;font-size:14px}
+.ctl{display:grid;gap:12px;margin-top:16px}
+.grp>span{display:block;font-size:12px;color:var(--mute);margin-bottom:5px}
+.seg{display:flex;gap:2px;background:var(--soft);border-radius:10px;padding:3px}
+.seg button{font:500 14px Inter,system-ui,sans-serif;min-height:38px;padding:0 10px;border-radius:8px;border:0;background:transparent;color:var(--mute);cursor:pointer;flex:1 1 0;white-space:nowrap}
+.seg button[aria-pressed=true]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px #0000001f}
+details{border-top:1px solid var(--line);padding-top:8px}
+summary{cursor:pointer;min-height:36px;font-size:14px;font-weight:500;color:var(--mute);display:flex;align-items:center;justify-content:space-between;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:18px;font-weight:400}details[open] summary::after{content:"–"}
+details[open] summary{color:var(--ink)}
+.opt{display:grid;gap:12px;margin-top:6px}
+.swrow{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:14px}
+label.f{display:grid;gap:4px;font-size:12px;color:var(--mute);flex:1 1 140px}
+h3{font-size:16px;font-weight:600;margin:0 0 2px}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:12px;overflow-x:auto}
+.tabs button{font:500 14px Inter,system-ui,sans-serif;background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;padding:0 12px;min-height:44px;color:var(--mute);cursor:pointer;flex:1 0 auto}
+.tabs button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--ink)}
 .list{list-style:none;margin:0;padding:0}
-.list li{display:grid;grid-template-columns:76px minmax(0,1fr) auto;gap:4px 14px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
-.pr{font:700 32px/1 "Barlow Condensed",sans-serif;white-space:nowrap}
-.nm{font-weight:600}.nm small{font-weight:400;color:var(--mute)}
-.ad{color:var(--mute);font-size:14px}
-.rt{text-align:right;font-size:14px;white-space:nowrap}
-.rt b{font-size:16px}
-.rt a{color:var(--ink);display:inline-block;min-height:32px;padding-top:4px}
-.note{color:var(--mute);font-size:13px;margin:10px 0 0}
+.list li{border-bottom:1px solid var(--line)}
+.list a.row{display:grid;grid-template-columns:62px minmax(0,1fr) auto 12px;gap:2px 12px;align-items:center;padding:11px 0;color:inherit;text-decoration:none}
+.list a.row::after{content:"›";color:var(--grey);font-size:20px;line-height:1}
+.pr{font-size:19px;font-weight:600;letter-spacing:-.02em;white-space:nowrap;font-variant-numeric:tabular-nums}
+.nm{font-weight:500;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nm small{font-weight:400;color:var(--mute);font-size:13px}
+.ad{color:var(--mute);font-size:13px}
+.list .ad{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rt{text-align:right;font-size:14px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.rt small{display:block;color:var(--mute);font-size:12px}
+
+.note{color:var(--mute);font-size:12px;margin:10px 0 0}
 #status:empty{display:none}
-#status,.msg{background:var(--chip);border-radius:10px;padding:10px 12px;font-size:14px;margin:12px 0 0}
+#status,.msg{background:var(--soft);border-radius:10px;padding:10px 12px;font-size:13px;margin:12px 0 0}
 .msg:empty{display:none}
-#map{height:min(68vh,560px);border-radius:14px;border:1px solid var(--line);background:var(--chip);z-index:0}
-.pin{display:inline-block;transform:translate(-50%,-115%);background:#fff;color:#16181b;border:2px solid #16181b;border-radius:8px;padding:1px 6px;font:700 15px/1.2 "Barlow Condensed",sans-serif;white-space:nowrap;box-shadow:0 1px 3px #0004}
-.pin.low{border-color:#0a7d3b;color:#0a7d3b}
-.pin.best{background:#d42a1f;color:#fff;border-color:#fff;font-size:18px}
-.leaflet-popup-content{font:14px/1.45 Barlow,sans-serif}
-.leaflet-popup-content a{color:#a51f16;font-weight:600}
-.kpi{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px}
-.kpi .v{font:700 52px/1 "Barlow Condensed",sans-serif;white-space:nowrap}
-.kpi .d{font-weight:600;white-space:nowrap}
-.up{color:var(--red)}.down{color:#0a7d3b}
-.verdict{border-left:4px solid var(--yel);padding:6px 0 6px 12px;margin:12px 0 0;font-weight:500}
-.fig{position:relative;height:260px;margin-top:12px}.fig>svg{position:absolute;inset:0;width:100%;height:100%}
-.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--mute);margin-top:6px}
-.legend i{display:inline-block;width:18px;height:3px;vertical-align:middle;margin-right:6px;border-radius:2px}
+#map{height:min(66vh,540px);border-radius:14px;border:1px solid var(--line);background:var(--soft);z-index:0}
+.pin{display:inline-block;transform:translate(-50%,-120%);background:#fff;color:#111214;border:1px solid #d9d9dc;border-radius:7px;padding:1px 6px;font:600 12px/1.35 Inter,system-ui,sans-serif;white-space:nowrap;box-shadow:0 1px 3px #0003;font-variant-numeric:tabular-nums}
+.pin.low{color:#0b7a3a;border-color:#0b7a3a}
+.pin.best{background:#d42a1f;color:#fff;border-color:#d42a1f;font-size:13px}
+.leaflet-popup-content{font:13px/1.5 Inter,system-ui,sans-serif}
+.leaflet-popup-content a{color:#d42a1f;font-weight:600}
+.kpi{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px;margin-top:6px}
+.kpi .v{font-size:32px;font-weight:600;letter-spacing:-.03em;line-height:1.1;white-space:nowrap;font-variant-numeric:tabular-nums}
+.kpi .d{font-size:14px;font-weight:500;white-space:nowrap}
+.up{color:var(--red)}.down{color:var(--green)}
+.verdict{background:var(--soft);border-radius:10px;padding:10px 12px;margin:12px 0 0;font-size:14px}
+.fig{position:relative;height:230px;margin-top:12px}.fig>svg{position:absolute;inset:0;width:100%;height:100%;color:var(--ink)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--mute);margin-top:6px}
+.legend i{display:inline-block;width:16px;height:2px;vertical-align:middle;margin-right:6px;border-radius:2px}
 .alhead{display:flex;justify-content:space-between;align-items:center;gap:16px}
-.sw{flex:none;width:64px;height:36px;border-radius:99px;border:0;background:var(--line);position:relative;cursor:pointer}
-.sw::after{content:"";position:absolute;top:4px;left:4px;width:28px;height:28px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #0005;transition:left .15s}
-.sw[aria-checked=true]{background:#0a7d3b}.sw[aria-checked=true]::after{left:32px}
-.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:14px}
-ol.steps{padding-left:22px;margin:14px 0 0;display:grid;gap:12px}
-ol.steps a:not(.b){color:var(--ink);font-weight:600}
-code{background:var(--chip);border-radius:6px;padding:2px 6px;overflow-wrap:anywhere;font-size:14px}
-@media(max-width:420px){.list li{grid-template-columns:64px minmax(0,1fr)}.rt{grid-column:2;text-align:left;display:flex;gap:12px;flex-wrap:wrap}.pr{font-size:28px}.tabs button{padding:0 8px;font-size:15px}}
-@media(min-width:900px){.wrap{grid-template-columns:400px minmax(0,1fr);align-items:start;column-gap:48px}.side{position:sticky;top:20px}header{grid-column:1/-1}}
-@media(prefers-reduced-motion:no-preference){.sign{animation:up .35s ease-out}@keyframes up{from{opacity:0;transform:translateY(8px)}}}
+.sw{flex:none;width:46px;height:28px;border-radius:99px;border:0;background:var(--line);position:relative;cursor:pointer}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 2px #0004;transition:left .15s}
+.sw[aria-checked=true]{background:var(--green)}.sw[aria-checked=true]::after{left:21px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:14px}
+ol.steps{padding-left:20px;margin:14px 0 0;display:grid;gap:12px;font-size:14px}
+ol.steps a:not(.b){color:var(--ink);font-weight:500}
+code{background:var(--soft);border-radius:6px;padding:1px 6px;overflow-wrap:anywhere;font-size:13px}
+@media(max-width:400px){.list a.row{grid-template-columns:54px minmax(0,1fr) auto 10px;gap:2px 10px}.pr{font-size:17px}.tabs button{padding:0 8px}.price{font-size:40px}}
+@media(min-width:900px){.wrap{grid-template-columns:360px minmax(0,1fr);align-items:start;column-gap:44px}.side{position:sticky;top:20px}header{grid-column:1/-1}}
+@media(prefers-reduced-motion:no-preference){.hero{animation:up .3s ease-out}@keyframes up{from{opacity:0;transform:translateY(6px)}}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <h1>Essence au meilleur prix</h1>
-    <p class="meta" id="meta"><span id="fresh">Chargement des prix…</span>
-      <label class="lnk" for="file" id="impLbl" hidden>Importer le fichier du jour</label>
+    <p class="fresh" id="freshBox"><span class="dot"></span><span id="fresh">Chargement des prix…</span>
+      <label class="lnk" for="file" id="impLbl" hidden>Importer</label>
       <input type="file" id="file" accept=".xlsx,.xls,.csv" hidden></p>
   </header>
 
   <div class="side">
     <div class="pos" id="posbar">
-      <div><small>Autour de</small><b id="poslbl">…</b></div>
-      <button class="lnk" id="gps" type="button" hidden>Ma position</button>
+      <span class="where">Autour de <b id="poslbl">…</b></span>
+      <button class="lnk" id="gps" type="button" hidden>Me localiser</button>
       <button class="lnk" id="homeBtn" type="button" hidden>Chez moi</button>
       <button class="lnk" id="chg" type="button">Changer</button>
     </div>
@@ -129,7 +138,7 @@ code{background:var(--chip);border-radius:6px;padding:2px 6px;overflow-wrap:anyw
     </form>
 
     <p id="status" role="status"></p>
-    <div id="hero" style="margin-top:16px"></div>
+    <div id="hero" style="margin-top:12px"></div>
 
     <div class="ctl">
       <div class="grp"><span>Carburant</span><div class="seg" data-k="fuel">
@@ -138,15 +147,16 @@ code{background:var(--chip);border-radius:6px;padding:2px 6px;overflow-wrap:anyw
         <button type="button" data-v="3">3 km</button><button type="button" data-v="5">5 km</button><button type="button" data-v="10">10 km</button><button type="button" data-v="25">25 km</button></div></div>
       <div class="grp"><span>Trier par</span><div class="seg" data-k="sort">
         <button type="button" data-v="best">Meilleur choix</button><button type="button" data-v="price">Prix</button><button type="button" data-v="dist">Distance</button></div></div>
-      <div class="grp"><span>Costco (membres seulement)</span><div class="seg" data-k="costco">
-        <button type="button" data-v="1">Inclure</button><button type="button" data-v="0">Exclure</button></div></div>
       <details>
-        <summary>Réglages du calcul</summary>
-        <div class="row">
-          <label class="f">Plein (litres)<input type="number" id="tank" min="10" max="200" step="1"></label>
-          <label class="f">Consommation (L/100 km)<input type="number" id="cons" min="2" max="30" step="0.1"></label>
+        <summary>Options</summary>
+        <div class="opt">
+          <div class="swrow"><span>Inclure Costco <span class="ad">(membres seulement)</span></span><button class="sw" id="costcoSw" role="switch" aria-checked="true" aria-label="Inclure Costco" type="button"></button></div>
+          <div class="row">
+            <label class="f">Plein (litres)<input type="number" id="tank" min="10" max="200" step="1"></label>
+            <label class="f">Consommation (L/100 km)<input type="number" id="cons" min="2" max="30" step="0.1"></label>
+          </div>
+          <p class="note" style="margin:0">« Meilleur choix » compte le prix du plein et l'essence brûlée pour l'aller-retour (distance à vol d'oiseau × 1,3).</p>
         </div>
-        <p class="note">« Meilleur choix » compte le prix du plein et l'essence brûlée pour l'aller-retour. Distances à vol d'oiseau; le trajet est estimé à 1,3 fois cette distance.</p>
       </details>
     </div>
   </div>
@@ -218,7 +228,7 @@ const money = n => n.toLocaleString('fr-CA',{style:'currency',currency:'CAD'});
 const km = d => (d<10?fmt1(d):Math.round(d).toLocaleString('fr-CA'))+' km';
 const when = t => new Date(t).toLocaleString('fr-CA',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'});
 
-let S = [], TS = 0, OUT = [];
+let S = [], TS = 0, OUT = [], gpsOk = false;
 let set = Object.assign({fuel:0,radius:5,sort:'best',costco:1,tank:50,cons:8,tab:'list'}, store.get('set',{}));
 let pos = store.get('pos', null), home = store.get('home', null);
 if (pos && pos.label==='Ma position') pos.label='Dernière position';
@@ -234,10 +244,17 @@ function build(rows, ts){
   const seen = new Map();
   for (const s of S) if (s.cityN && (!seen.has(s.cityN) || seen.get(s.cityN)===seen.get(s.cityN).toUpperCase())) seen.set(s.cityN, s.city);
   $('cities').innerHTML = [...seen.values()].sort((x,y)=>x.localeCompare(y,'fr')).map(c=>`<option value="${esc(c)}">`).join('');
-  const old = Date.now()-ts > 2*3600e3;
-  $('meta').classList.toggle('stale', old);
-  $('impLbl').hidden = !old;
-  $('fresh').textContent = `Prix du ${when(ts)} · ${S.length.toLocaleString('fr-CA')} stations` + (old ? ' · pas à jour' : '');
+  fresh();
+}
+function fresh(){
+  if (!TS) return;
+  const min = Math.max(0, Math.round((Date.now()-TS)/6e4));
+  const d = new Date(TS), today = new Date().toDateString()===d.toDateString();
+  const at = d.toLocaleTimeString('fr-CA',{hour:'numeric',minute:'2-digit'});
+  const ago = min<1 ? "à l'instant" : min<60 ? `il y a ${min} min` : min<1440 ? `il y a ${Math.floor(min/60)} h ${String(min%60).padStart(2,'0')}` : `le ${d.toLocaleDateString('fr-CA',{day:'numeric',month:'short'})}`;
+  $('fresh').textContent = `Mis à jour ${today?'à '+at:''} · ${ago}`.replace('Mis à jour  · ','Mis à jour ');
+  $('freshBox').className = 'fresh' + (min>120 ? ' old' : min>45 ? ' mid' : '');
+  $('impLbl').hidden = min<=120;
 }
 function setData(rows, ts, keep){
   build(rows, ts);
@@ -289,14 +306,17 @@ function compute(){
   return {out, avg, L};
 }
 const title = s => (s.b && norm(s.b)!=='aucun') ? s.b : (s.n||'Station');
+const addr = a => String(a||'').replace(/\s+,/g,',').replace(/\b([A-ZÀ-Ý])([A-ZÀ-Ý'’-]{2,})\b/g, (m,x,y)=>x+y.toLowerCase());
 const sub = s => (s.b && norm(s.b)!=='aucun' && s.n) ? s.n : '';
 const maps = s => `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lon}`;
 
 /* ---------- Affichage ---------- */
 function render(){
   for (const g of document.querySelectorAll('.seg[data-k]')) for (const b of g.children) b.setAttribute('aria-pressed', String(String(set[g.dataset.k])===b.dataset.v));
+  $('costcoSw').setAttribute('aria-checked', String(!!set.costco));
   $('tank').value=set.tank; $('cons').value=set.cons;
   $('homeBtn').hidden = !home || (pos && home.label===pos.label);
+  $('gps').hidden = !gpsOk || (pos && pos.label==='Ma position');
   if (!pos || !S.length) { $('poslbl').textContent='—'; $('hero').innerHTML=''; $('list').innerHTML=''; return; }
   $('poslbl').textContent = pos.label + (home && home.label===pos.label ? ' · chez moi' : '');
   const {out, avg, L} = compute();
@@ -307,21 +327,20 @@ function render(){
   } else {
     const t=out[0], save=(avg-t.p)/100*L;
     const tag = {best:'Meilleur choix',price:'Le moins cher',dist:'Le plus proche'}[set.sort];
-    $('hero').innerHTML = `<div class="sign">
-      <span class="tag">${tag} · ${FUEL[set.fuel]}</span>
-      <div class="big">${fmt1(t.p)}<span>¢/L</span></div>
+    $('hero').innerHTML = `<div class="card hero">
+      <p class="lab">${tag} · ${FUEL[set.fuel]}</p>
+      <div class="top"><div class="price">${fmt1(t.p)}<small>¢/L</small></div><a class="go" href="${maps(t.s)}" target="_blank" rel="noopener">Itinéraire</a></div>
       <h2>${esc(title(t.s))}</h2>
-      <p>${esc(t.s.a)}</p>
-      <div class="facts"><span>${km(t.d)}</span><span>Plein de ${L} L : ${money(t.cost)} trajet compris</span></div>
-      ${save>=0.05 ? `<div class="save"><span class="tag">${money(save)} de moins qu'au prix moyen du secteur (${fmt1(avg)} ¢)</span></div>` : `<p class="save">Prix moyen du secteur : ${fmt1(avg)} ¢</p>`}
-      <a class="go" href="${maps(t.s)}" target="_blank" rel="noopener">Itinéraire</a></div>`;
+      <p class="ad">${esc(addr(t.s.a))}</p>
+      <div class="facts num"><span>${km(t.d)}</span><span>Plein de ${L} L : ${money(t.cost)}</span></div>
+      ${save>=0.05 ? `<p class="save num">${money(save)} de moins que la moyenne du secteur (${fmt1(avg)} ¢)</p>` : `<p class="facts num">Moyenne du secteur : ${fmt1(avg)} ¢</p>`}</div>`;
     const rest = out.slice(1, 61);
     $('lh').textContent = rest.length ? 'Autres stations' : 'Aucune autre station';
-    $('lsub').textContent = `${out.length} station${out.length>1?'s':''} dans ${set.radius} km` + (out.length>61 ? ' · 60 premières affichées' : '');
-    $('list').innerHTML = rest.map(o=>`<li>
+    $('lsub').textContent = `${out.length} station${out.length>1?'s':''} dans ${set.radius} km` + (out.length>61 ? ' · 60 premières affichées' : '') + ' · touche une station pour l\'itinéraire';
+    $('list').innerHTML = rest.map(o=>`<li><a class="row" href="${maps(o.s)}" target="_blank" rel="noopener" aria-label="Itinéraire vers ${esc(title(o.s))}, ${esc(addr(o.s.a))}">
       <div class="pr">${fmt1(o.p)}</div>
-      <div><div class="nm">${esc(title(o.s))}${sub(o.s)?` <small>${esc(sub(o.s))}</small>`:''}</div><div class="ad">${esc(o.s.a)}</div></div>
-      <div class="rt"><b>${km(o.d)}</b><br><span>${money(o.cost)}</span><br><a href="${maps(o.s)}" target="_blank" rel="noopener">Itinéraire</a></div></li>`).join('');
+      <div><div class="nm">${esc(title(o.s))}</div><div class="ad">${esc(addr(o.s.a))}</div></div>
+      <div class="rt">${km(o.d)}<small>${money(o.cost)}</small></div></a></li>`).join('');
   }
   if (set.tab==='map') drawMap();
   if (set.tab==='trend') drawTrend();
@@ -367,7 +386,7 @@ async function drawMap(){
       const cls = i===0 ? 'pin best' : (o.p<=low ? 'pin low' : 'pin');
       const icon = L.divIcon({className:'', html:`<span class="${cls}">${fmt1(o.p)}</span>`, iconSize:null});
       L.marker([o.s.lat,o.s.lon], {icon, zIndexOffset: i===0?1000:(o.p<=low?500:0), title:title(o.s)})
-        .bindPopup(`<b>${esc(title(o.s))}</b><br>${esc(o.s.a)}<br>${fmt1(o.p)} ¢/L · ${km(o.d)}<br><a href="${maps(o.s)}" target="_blank" rel="noopener">Itinéraire</a>`)
+        .bindPopup(`<b>${esc(title(o.s))}</b><br>${esc(addr(o.s.a))}<br>${fmt1(o.p)} ¢/L · ${km(o.d)}<br><a href="${maps(o.s)}" target="_blank" rel="noopener">Itinéraire</a>`)
         .addTo(layer);
     });
   }
@@ -471,7 +490,7 @@ async function publish(cfg){
   if (!r.ok) throw new Error(r.status);
 }
 const cfgOf = a => ({v:1, topic:a.topic, on:true, lat:a.lat, lon:a.lon, r:a.r, f:a.f, s:a.s});
-function zoneFrom(p){ const z = /position/i.test(p.label) ? 'ta position du '+new Date().toLocaleDateString('fr-CA',{day:'numeric',month:'short'}) : p.label; return {lat:Math.round(p.lat*50)/50, lon:Math.round(p.lon*50)/50, zone:z}; }
+function zoneFrom(p){ const z = /position/i.test(p.label) ? 'ta position ('+new Date().toLocaleDateString('fr-CA',{day:'numeric',month:'short'})+')' : p.label; return {lat:Math.round(p.lat*50)/50, lon:Math.round(p.lon*50)/50, zone:z}; }
 function renderAlert(){
   if (alerte.s==null && OUT.length) alerte.s = Math.floor(Math.min(...OUT.map(o=>o.p)))-0.1;
   if (!alerte.lat && (home||pos)) Object.assign(alerte, zoneFrom(home||pos));
@@ -580,7 +599,7 @@ function gpsNow(){
   $('poslbl').textContent='Recherche de ta position…';
   navigator.geolocation.getCurrentPosition(
     g=>usePos({lat:g.coords.latitude, lon:g.coords.longitude, label:'Ma position'}),
-    ()=>{ $('gps').hidden=true; render(); $('posform').hidden=false; $('perr').textContent="Position non disponible. Entre ton code postal ou ta ville."; },
+    ()=>{ gpsOk=false; render(); $('posform').hidden=false; $('perr').textContent="Position non disponible. Entre ton code postal ou ta ville."; },
     {enableHighAccuracy:true, timeout:10000, maximumAge:60000});
 }
 $('gps').addEventListener('click', gpsNow);
@@ -589,7 +608,7 @@ async function gpsSetup(){
   let st='prompt';
   try { st = (await navigator.permissions.query({name:'geolocation'})).state; } catch(e) {}
   if (st==='denied') return;
-  $('gps').hidden=false;
+  gpsOk=true; render();
   if (st==='granted') gpsNow();
 }
 
@@ -599,6 +618,7 @@ for (const g of document.querySelectorAll('.seg[data-k]')) g.addEventListener('c
   const k=g.dataset.k; set[k] = k==='sort' ? b.dataset.v : +b.dataset.v;
   store.set('set',set); render();
 });
+$('costcoSw').addEventListener('click', ()=>{ set.costco = set.costco ? 0 : 1; store.set('set',set); render(); });
 for (const id of ['tank','cons']) $(id).addEventListener('input', e=>{ const v=parseFloat(e.target.value); if (v>0) { set[id]=v; store.set('set',set); render(); } });
 
 /* ---------- Chargement ---------- */
@@ -612,9 +632,10 @@ async function load(){
   loadedAt = Date.now();
   if (saved && Array.isArray(saved.rows) && (!rows || saved.ts > ts)) setData(saved.rows, saved.ts, false);
   else if (rows) setData(rows, ts || Date.now(), false);
-  else { $('fresh').textContent='Aucun prix chargé.'; $('impLbl').hidden=false; $('status').textContent="Importe le fichier Excel des stations de la Régie pour commencer."; }
+  else { $('fresh').textContent='Aucun prix chargé'; $('impLbl').hidden=false; $('status').textContent="Importe le fichier Excel des stations de la Régie pour commencer."; }
 }
-document.addEventListener('visibilitychange', ()=>{ if (!document.hidden && Date.now()-loadedAt > 10*60e3) load(); });
+document.addEventListener('visibilitychange', ()=>{ if (!document.hidden && Date.now()-loadedAt > 5*60e3) load(); });
+setInterval(()=>{ fresh(); if (!document.hidden && Date.now()-loadedAt > 5*60e3) load(); }, 60e3);
 showTab(['list','map','trend','alert'].includes(set.tab) ? set.tab : 'list');
 load().then(()=>{
   gpsSetup();

@@ -1,9 +1,18 @@
 name: Mise à jour des prix
 
+# GitHub lance les tâches programmées environ une fois par heure, pas plus souvent.
+# Chaque lancement fait donc 4 mises à jour espacées de 15 minutes.
 on:
   schedule:
-    - cron: "7,22,37,52 * * * *"   # aux 15 minutes
+    - cron: "7,37 * * * *"
   workflow_dispatch:
+    inputs:
+      tours:
+        description: "Nombre de mises à jour (1 à 4)"
+        default: "4"
+      pause:
+        description: "Minutes entre les mises à jour"
+        default: "14"
   push:
     branches: [main]
 
@@ -16,12 +25,17 @@ concurrency:
   group: pages
   cancel-in-progress: false
 
+env:
+  TOURS: ${{ inputs.tours || (github.event_name == 'push' && '1') || '4' }}
+  PAUSE: ${{ inputs.pause || '14' }}
+
 jobs:
   maj:
     runs-on: ubuntu-latest
+    timeout-minutes: 75
     environment:
       name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
+      url: ${{ steps.deploy1.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -31,39 +45,42 @@ jobs:
 
       - run: pip install openpyxl==3.1.5
 
-      - name: Télécharger le fichier de la Régie
-        id: regie
-        continue-on-error: true
-        run: python scripts/maj.py site/stations.json
-
-      - name: Historique des prix
-        continue-on-error: true
-        run: python scripts/historique.py
-
-      - name: Alertes de prix
-        continue-on-error: true
-        run: python scripts/alertes.py ${{ steps.regie.outcome }}
-
-      # Enregistre l'état des alertes et la copie quotidienne de l'historique.
-      # Ce commit garde aussi le dépôt actif (GitHub met en pause les tâches
-      # programmées d'un dépôt public inactif depuis 60 jours).
-      - name: Enregistrer dans le dépôt
-        continue-on-error: true
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/
-          if ! git diff --cached --quiet; then
-            git commit -m "Données $(date -u +'%F %H:%M')"
-            git pull --rebase --autostash -X theirs origin main || true
-            git push
-          fi
-
       - uses: actions/configure-pages@v5
 
+      # Mise à jour 1
+      - run: bash scripts/tour.sh
       - uses: actions/upload-pages-artifact@v3
-        with:
-          path: site
-
-      - id: deploy
+        with: { path: site, name: pages-1 }
+      - id: deploy1
         uses: actions/deploy-pages@v4
+        with: { artifact_name: pages-1 }
+
+      # Mise à jour 2
+      - if: fromJSON(env.TOURS) >= 2
+        run: sleep $((PAUSE*60)) && bash scripts/tour.sh
+      - if: fromJSON(env.TOURS) >= 2
+        uses: actions/upload-pages-artifact@v3
+        with: { path: site, name: pages-2 }
+      - if: fromJSON(env.TOURS) >= 2
+        uses: actions/deploy-pages@v4
+        with: { artifact_name: pages-2 }
+
+      # Mise à jour 3
+      - if: fromJSON(env.TOURS) >= 3
+        run: sleep $((PAUSE*60)) && bash scripts/tour.sh
+      - if: fromJSON(env.TOURS) >= 3
+        uses: actions/upload-pages-artifact@v3
+        with: { path: site, name: pages-3 }
+      - if: fromJSON(env.TOURS) >= 3
+        uses: actions/deploy-pages@v4
+        with: { artifact_name: pages-3 }
+
+      # Mise à jour 4
+      - if: fromJSON(env.TOURS) >= 4
+        run: sleep $((PAUSE*60)) && bash scripts/tour.sh
+      - if: fromJSON(env.TOURS) >= 4
+        uses: actions/upload-pages-artifact@v3
+        with: { path: site, name: pages-4 }
+      - if: fromJSON(env.TOURS) >= 4
+        uses: actions/deploy-pages@v4
+        with: { artifact_name: pages-4 }
