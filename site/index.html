@@ -71,14 +71,23 @@ label.ck{display:flex;gap:8px;align-items:center;font-size:15px;min-height:32px}
 .empty{background:var(--soft);border-radius:16px;padding:20px;color:var(--mute);margin:22px 0 0}
 h3{font-size:14px;font-weight:600;color:var(--mute);margin:26px 0 4px}
 .list{list-style:none;margin:0;padding:0}
-.list a{display:grid;grid-template-columns:minmax(0,1fr) auto 14px;gap:2px 12px;align-items:center;padding:12px 0;border-top:1px solid var(--line);color:inherit;text-decoration:none}
-.list a::after{content:"›";color:var(--mute);font-size:20px;line-height:1}
+.list a{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;align-items:center;padding:12px 0;color:inherit;text-decoration:none}
 .nm{font-size:16px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ad{font-size:13px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pr{font-size:18px;font-weight:600;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .pr small{display:block;font-size:12px;font-weight:400;color:var(--mute)}
 .pr.g{color:var(--gtext)}
 .more{width:100%;margin-top:8px}
+.list li{display:grid;grid-template-columns:minmax(0,1fr) 44px;align-items:center;border-top:1px solid var(--line)}
+.list li a{border-top:0}
+.star{width:44px;height:44px;border:0;background:none;color:var(--mute);display:grid;place-items:center;cursor:pointer;padding:0}
+.star svg.i{width:22px;height:22px}
+.star.on{color:#f59e0b}.star.on svg.i{fill:#f59e0b}
+.hero .name .star{display:inline-grid;vertical-align:middle;margin-left:2px}
+.hero .rab{margin:6px 0 0;font-size:14px;color:var(--mute)}
+.hero .share{width:100%;margin-top:10px}
+.rlist{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:4px}
+.rlist li{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:15px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:16px}
 h2.t{font-size:26px;font-weight:700;margin:20px 0 0;letter-spacing:-.01em}
 #map{height:min(64vh,540px);border-radius:18px;overflow:hidden;background:var(--soft);z-index:0;margin-top:14px}
@@ -146,10 +155,24 @@ code{background:var(--soft);border-radius:6px;padding:1px 6px;overflow-wrap:anyw
 
   <div id="v-list">
     <div id="hero"></div>
+    <h3 id="fh" hidden>Mes favoris</h3>
+    <ul class="list" id="favList"></ul>
     <h3 id="lh">Autres choix proches</h3>
     <p class="note" id="lsub" style="margin:0 0 6px"></p>
     <ul class="list" id="list"></ul>
     <button class="b o more" id="moreBtn" type="button" hidden>Voir plus</button>
+
+    <div class="card" id="rab">
+      <b>Mes rabais</b>
+      <p class="note" style="margin-top:2px">Une carte de fidélité ou un rabais chez une bannière ? Il sera enlevé du prix et compté dans le classement.</p>
+      <ul class="rlist" id="rabList"></ul>
+      <div class="row" style="margin-top:10px">
+        <label class="f">Bannière<select id="rabB"><option value="">Choisir…</option></select></label>
+        <label class="f" style="flex:0 1 110px">Rabais (¢/L)<input type="number" id="rabV" min="0.1" max="50" step="0.1" inputmode="decimal" placeholder="3"></label>
+        <button class="b dark" id="rabAdd" type="button">Ajouter</button>
+      </div>
+      <p class="err" id="rabErr" style="margin-top:6px"></p>
+    </div>
 
     <div class="card" id="veh">
       <b>Mon véhicule</b>
@@ -296,19 +319,34 @@ function locate(q){
   const nice = m.find(s=>s.city!==s.city.toUpperCase())?.city || m[0].city;
   return centroid(m, nice+' (centre)');
 }
+function entry(s, d){
+  const p0=s.p[set.fuel]; if (p0==null) return null;
+  const L=+set.tank||50, C=+set.cons||8, r=DISC[norm(s.b)], disc=r ? r.c : 0, p=Math.max(0, p0-disc);
+  return {s, p, p0, disc, d, cost:p/100*(L+2*d*1.3*C/100)};
+}
 function compute(){
-  const f=set.fuel, L=+set.tank||50, C=+set.cons||8;
+  const L=+set.tank||50;
   const out=[];
   for (const s of S) {
-    const p=s.p[f]; if (p==null) continue;
     if (!set.costco && /costco/.test(norm(s.b+' '+s.n))) continue;
     const d=hav(pos.lat,pos.lon,s.lat,s.lon); if (d>set.radius) continue;
-    out.push({s,p,d,cost:p/100*(L+2*d*1.3*C/100)});
+    const o=entry(s,d); if (o) out.push(o);
   }
   const by = {best:(a,b)=>a.cost-b.cost||a.d-b.d, price:(a,b)=>a.p-b.p||a.d-b.d, dist:(a,b)=>a.d-b.d||a.p-b.p}[set.sort];
   out.sort(by);
   const avg = out.length ? out.reduce((t,o)=>t+o.p,0)/out.length : 0;
   return {out, avg, L};
+}
+const sid = s => s.lat.toFixed(5)+','+s.lon.toFixed(5);
+let FAV = new Set(store.get('fav', []));
+let DISC = store.get('disc', {});
+let HERO = null;
+const STAR = '<svg class="i" viewBox="0 0 24 24"><path d="M12 17.75l-6.17 3.24l1.18-6.87l-5-4.87l6.9-1l3.09-6.25l3.09 6.25l6.9 1l-5 4.87l1.18 6.87z"/></svg>';
+function starBtn(s){ const on=FAV.has(sid(s)); return `<button class="star${on?' on':''}" type="button" data-fav="${sid(s)}" aria-pressed="${on}" aria-label="${on?'Retirer des':'Ajouter aux'} favoris">${STAR}</button>`; }
+function row(o, avg){
+  return `<li><a href="${maps(o.s)}" target="_blank" rel="noopener" aria-label="Itinéraire vers ${esc(title(o.s))}, ${esc(addr(o.s.a))}">
+    <div><div class="nm">${esc(title(o.s))}</div><div class="ad">${km(o.d)} · ${esc(addr(o.s.a))}</div></div>
+    <div class="pr${o.p < avg-0.5 ? ' g' : ''}">${fmt1(o.p)}<small>${o.disc ? 'rabais −'+fmt1(o.disc)+' ¢' : money(o.cost)}</small></div></a>${starBtn(o.s)}</li>`;
 }
 const title = s => (s.b && norm(s.b)!=='aucun') ? s.b : (s.n||'Station');
 const addr = a => String(a||'').replace(/\s+,/g,',').replace(/\b([A-ZÀ-Ý])([A-ZÀ-Ý'’-]{2,})\b/g, (m,x,y)=>x+y.toLowerCase());
@@ -323,30 +361,39 @@ function render(){
   if (document.activeElement!==$('cons')) $('cons').value=set.cons;
   $('homeBtn').hidden = !home || (pos && home.label===pos.label);
   $('gps').hidden = !gpsOk || (pos && pos.label==='Ma position');
-  if (!pos || !S.length) { $('poslbl').textContent='—'; $('hero').innerHTML=''; $('list').innerHTML=''; return; }
+  if (!pos || !S.length) { $('poslbl').textContent='—'; $('hero').innerHTML=''; $('list').innerHTML=''; $('favList').innerHTML=''; return; }
+  renderDisc();
   $('poslbl').textContent = pos.label + (home && home.label===pos.label ? ' · chez moi' : '');
   const {out, avg, L} = compute();
   OUT = out;
   if (!out.length) {
     $('hero').innerHTML = `<p class="empty">Aucune station n'affiche de ${FUEL[set.fuel].toLowerCase()} à ${set.radius} km ou moins. Choisis une plus grande distance.</p>`;
-    $('list').innerHTML=''; $('lh').hidden=true; $('lsub').textContent=''; $('moreBtn').hidden=true;
+    $('list').innerHTML=''; $('lh').hidden=true; $('lsub').textContent=''; $('moreBtn').hidden=true; $('favList').innerHTML=''; $('fh').hidden=true;
   } else {
-    const t=out[0], save=(avg-t.p)/100*L;
+    const t=out[0];
+    const near = out.reduce((a,o)=>o.d<a.d?o:a, out[0]), net = near.cost - t.cost;
+    const gain = near===t ? 'c\'est aussi la plus proche'
+      : net>=0.05 ? `tu sauves ${money(net)} vs la plus proche (${esc(title(near.s))}, ${km(near.d)}), trajet compris`
+      : net<=-0.05 ? `${money(-net)} de plus que la plus proche (${esc(title(near.s))}), trajet compris` : 'même coût que la plus proche, trajet compris';
     const lead = {best:'Va faire le plein chez',price:'Le moins cher est chez',dist:'Le plus proche est'}[set.sort];
     $('hero').innerHTML = `<div class="hero">
       <p class="lead">${lead}</p>
-      <p class="name">${esc(title(t.s))}</p>
+      <p class="name">${esc(title(t.s))} ${starBtn(t.s)}</p>
       <p class="addr">${esc(addr(t.s.a))}</p>
       <p class="price">${fmt1(t.p)}<small> ¢/L</small></p>
-      <p class="gain">${km(t.d)} · ${save>=0.05 ? `tu sauves ${money(save)} sur ton plein` : `prix moyen du coin : ${fmt1(avg)} ¢`}</p>
+      ${t.disc ? `<p class="rab">Avec ton rabais de ${fmt1(t.disc)} ¢ (affiché ${fmt1(t.p0)} ¢)</p>` : ''}
+      <p class="gain">${km(t.d)} · ${gain}</p>
       <a class="b go" href="${maps(t.s)}" target="_blank" rel="noopener"><svg class="i" viewBox="0 0 24 24"><path d="M12 18.5l7.3 2.5a.5.5 0 0 0 .6-.7L12 3l-7.9 17.3a.5.5 0 0 0 .6.7z"/></svg>Y aller</a>
+      <button class="b o share" id="shareBtn" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M12 3v12"/><path d="M8 7l4-4l4 4"/></svg>Envoyer à un ami</button>
       <p class="cost">Plein de ${L} L : ${money(t.cost)}${set.car ? ' · '+esc(set.car) : ''} · <a href="#veh" style="color:inherit">modifier</a></p></div>`;
-    const rest = out.slice(1, 61), shown = showAll ? rest : rest.slice(0, 8);
+    HERO = t;
+    const favs = S.filter(s=>FAV.has(sid(s)) && s!==t.s).map(s=>entry(s, hav(pos.lat,pos.lon,s.lat,s.lon))).filter(Boolean).sort((a,b)=>a.cost-b.cost);
+    $('fh').hidden = !favs.length;
+    $('favList').innerHTML = favs.map(o=>row(o, avg)).join('');
+    const rest = out.slice(1).filter(o=>!FAV.has(sid(o.s))).slice(0, 60), shown = showAll ? rest : rest.slice(0, 8);
     $('lh').hidden = !rest.length;
     $('lsub').textContent = '';
-    $('list').innerHTML = shown.map(o=>`<li><a href="${maps(o.s)}" target="_blank" rel="noopener" aria-label="Itinéraire vers ${esc(title(o.s))}, ${esc(addr(o.s.a))}">
-      <div><div class="nm">${esc(title(o.s))}</div><div class="ad">${km(o.d)} · ${esc(addr(o.s.a))}</div></div>
-      <div class="pr${o.p < avg-0.5 ? ' g' : ''}">${fmt1(o.p)}<small>${money(o.cost)}</small></div></a></li>`).join('');
+    $('list').innerHTML = shown.map(o=>row(o, avg)).join('');
     $('moreBtn').hidden = showAll || rest.length <= 8;
     $('moreBtn').textContent = `Voir les ${rest.length-8} autres`;
   }
@@ -673,6 +720,49 @@ $('carYear').addEventListener('change', ()=>{
   if (!g) { carNote(`On n'a pas la capacité du réservoir pour ${mk} ${md} ${v==='old'?'de cette année':y}. Regarde dans ton manuel (section « Capacités ») et écris-la plus haut.`); return; }
   set.tank = g[2]; set.car = `${mk} ${md} ${y}`; set.carGen = `${g[0]}–${g[1]||'aujourd’hui'}`;
   store.set('set',set); carNote(); render();
+});
+
+/* ---------- Favoris ---------- */
+document.addEventListener('click', e=>{
+  const b = e.target.closest('[data-fav]'); if (!b) return;
+  e.preventDefault();
+  const id = b.dataset.fav;
+  FAV.has(id) ? FAV.delete(id) : FAV.add(id);
+  store.set('fav', [...FAV]); render();
+});
+
+/* ---------- Rabais ---------- */
+function banners(){
+  const cnt = {}, nice = {};
+  for (const s of S) { const k=norm(s.b); if (!k || k==='aucun') continue; cnt[k]=(cnt[k]||0)+1; if (!nice[k] || nice[k]===nice[k].toUpperCase()) nice[k]=s.b; }
+  return Object.keys(cnt).filter(k=>cnt[k]>=3).sort((a,b)=>nice[a].localeCompare(nice[b],'fr')).map(k=>[k,nice[k]]);
+}
+let bannersDone = false;
+function renderDisc(){
+  if (!bannersDone && S.length) { $('rabB').innerHTML = '<option value="">Choisir…</option>' + banners().map(([k,n])=>`<option value="${esc(k)}">${esc(n)}</option>`).join(''); bannersDone = true; }
+  const items = Object.entries(DISC);
+  $('rabList').innerHTML = items.length ? items.map(([k,r])=>`<li><span>${esc(r.name)} : <b>−${fmt1(r.c)} ¢/L</b></span><button class="lnk" type="button" data-unrab="${esc(k)}">Retirer</button></li>`).join('') : '<li class="ad">Aucun rabais pour l\'instant.</li>';
+}
+$('rabAdd').addEventListener('click', ()=>{
+  const k=$('rabB').value, c=parseFloat(String($('rabV').value).replace(',','.'));
+  if (!k) { $('rabErr').textContent='Choisis une bannière.'; return; }
+  if (!(c>0 && c<=50)) { $('rabErr').textContent='Entre un rabais entre 0,1 et 50 ¢ par litre.'; return; }
+  $('rabErr').textContent='';
+  DISC[k] = {name:$('rabB').selectedOptions[0].textContent, c:Math.round(c*10)/10};
+  store.set('disc', DISC); $('rabV').value=''; $('rabB').value=''; render();
+});
+$('rabList').addEventListener('click', e=>{ const b=e.target.closest('[data-unrab]'); if (!b) return; delete DISC[b.dataset.unrab]; store.set('disc', DISC); render(); });
+
+/* ---------- Partager ---------- */
+document.addEventListener('click', async e=>{
+  if (!e.target.closest('#shareBtn') || !HERO) return;
+  const t = HERO, appUrl = location.origin + location.pathname;
+  const text = `Essence la moins chère près de moi : ${title(t.s)}, ${addr(t.s.a)} — ${fmt1(t.p0)} ¢/L (${FUEL[set.fuel].toLowerCase()}). Itinéraire : ${maps(t.s)}`;
+  try {
+    if (navigator.share) { await navigator.share({title:'Essence au meilleur prix', text, url: appUrl}); return; }
+  } catch(err) { if (err && err.name==='AbortError') return; }
+  try { await navigator.clipboard.writeText(text+' · '+appUrl); $('status').textContent='Message copié : colle-le dans un texto.'; setTimeout(()=>$('status').textContent='', 4000); }
+  catch(err) { $('status').textContent=text; }
 });
 
 /* ---------- Filtres ---------- */
