@@ -94,6 +94,7 @@ h3{font-size:14px;font-weight:600;color:var(--mute);margin:26px 0 4px}
 .sug button{display:block;width:100%;text-align:left;background:none;border:0;padding:10px;font:inherit;font-size:15px;color:var(--ink);border-radius:8px;cursor:pointer;min-height:44px}
 .sug button:hover,.sug button:focus-visible{background:var(--soft)}
 .sug small{display:block;color:var(--mute);font-size:12px}
+.sug .gattr{font-size:11px;color:var(--mute);text-align:right;padding:4px 8px 2px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.chips:empty{display:none}
 .chip{display:inline-flex;align-items:center;gap:4px;background:var(--soft);border:0;border-radius:99px;padding:0 4px 0 12px;min-height:40px;font:inherit;font-size:14px;color:var(--ink)}
 .chip button{background:none;border:0;font:inherit;color:inherit;cursor:pointer;min-height:40px;padding:0 4px}
@@ -788,10 +789,40 @@ async function photon(q){
 }
 let PLACES = store.get('places', []);
 function myPlaces(q){ const n=norm(q); return PLACES.filter(p=>norm(p.name).includes(n) || norm(p.label).includes(n)).map(p=>({...p, mine:true})); }
+// Recherche Google (Places API New). La clé est restreinte au site nadji-b02.github.io et à Places API (New).
+const GKEY = '';
+let gSess = null;
+const newSess = () => (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())+Math.random().toString(36).slice(2));
+async function gSuggest(q){
+  if (!GKEY) return null;
+  gSess = gSess || newSess();
+  const body = {input:q, sessionToken:gSess, languageCode:'fr', regionCode:'ca', includedRegionCodes:['ca']};
+  if (pos) body.locationBias = {circle:{center:{latitude:pos.lat, longitude:pos.lon}, radius:50000}};
+  if (acCtl) acCtl.abort();
+  acCtl = new AbortController();
+  const r = await fetch('https://places.googleapis.com/v1/places:autocomplete', {method:'POST', signal:acCtl.signal,
+    headers:{'Content-Type':'application/json','X-Goog-Api-Key':GKEY}, body:JSON.stringify(body)});
+  if (!r.ok) throw new Error('google '+r.status);
+  const j = await r.json();
+  return (j.suggestions||[]).filter(x=>x.placePrediction).map(x=>{
+    const p=x.placePrediction, main=(p.structuredFormat&&p.structuredFormat.mainText&&p.structuredFormat.mainText.text)||(p.text&&p.text.text)||'';
+    const sub=((p.structuredFormat&&p.structuredFormat.secondaryText&&p.structuredFormat.secondaryText.text)||'').replace(/, Canada$/,'');
+    return {gid:p.placeId, main, sub, label: sub ? `${main}, ${sub}` : main};
+  });
+}
+async function gDetails(x){
+  const r = await fetch(`https://places.googleapis.com/v1/places/${encodeURIComponent(x.gid)}?sessionToken=${encodeURIComponent(gSess||newSess())}&languageCode=fr`,
+    {headers:{'X-Goog-Api-Key':GKEY,'X-Goog-FieldMask':'location,formattedAddress'}});
+  gSess = null;
+  if (!r.ok) throw new Error('details '+r.status);
+  const j = await r.json(), fa = (j.formattedAddress||'').replace(/, Canada$/,'');
+  return {lat:j.location.latitude, lon:j.location.longitude, label: fa && !fa.startsWith(x.main) ? `${x.main}, ${fa}` : (fa || x.label)};
+}
 async function geocode(q){
   q = q.trim(); if (!q) return null;
   const exact = PLACES.find(p=>norm(p.name)===norm(q)); if (exact) return exact;
   if (POSTAL.test(q)) return locate(q);
+  if (GKEY) { try { const g = await gSuggest(q); if (g && g.length) return await gDetails(g[0]); } catch(e) {} }
   try { const r = await photon(q); if (r.length) return r[0]; } catch(e) {}
   return locate(q);
 }
@@ -805,17 +836,30 @@ function attachAC(inp){
     t = setTimeout(async ()=>{
       let r = [];
       if (q.length<3) { const mine=myPlaces(q); items=mine; ul.innerHTML=mine.map((x,i)=>`<li><button type="button" data-i="${i}">★ ${esc(x.name)}<small>${esc(x.label)}</small></button></li>`).join(''); ul.hidden=!mine.length; return; }
-      if (!POSTAL.test(q)) { try { r = await photon(q); } catch(e) { if (e.name==='AbortError') return; } }
+      let fromGoogle = false;
+      if (!POSTAL.test(q)) {
+        try { const g = await gSuggest(q); if (g) { r = g; fromGoogle = true; } } catch(e) { if (e.name==='AbortError') return; }
+        if (!fromGoogle) { try { r = await photon(q); } catch(e) { if (e.name==='AbortError') return; } }
+      }
       const loc = locate(q); if (loc && !r.some(x=>x.label===loc.label)) r.push(loc);
       if (inp.value.trim()!==q) return;
       const mine = myPlaces(q);
       items = [...mine, ...r].slice(0,7);
-      ul.innerHTML = items.map((x,i)=>`<li><button type="button" data-i="${i}">${x.mine ? `★ ${esc(x.name)}<small>${esc(x.label)}</small>` : esc(x.label)}</button></li>`).join('');
+      ul.innerHTML = items.map((x,i)=>`<li><button type="button" data-i="${i}">${x.mine ? `★ ${esc(x.name)}<small>${esc(x.label)}</small>` : x.gid ? `${esc(x.main)}<small>${esc(x.sub)}</small>` : esc(x.label)}</button></li>`).join('')
+        + (fromGoogle ? '<li class="gattr">Résultats fournis par Google Maps</li>' : '');
       ul.hidden = !items.length;
     }, 400);
   });
   ul.addEventListener('mousedown', e=>e.preventDefault());
-  ul.addEventListener('click', e=>{ const b=e.target.closest('button'); if (!b) return; const x=items[+b.dataset.i]; inp.value=x.label; inp._pick=x; ul.hidden=true; });
+  ul.addEventListener('click', async e=>{
+    const b=e.target.closest('button'); if (!b) return;
+    const x=items[+b.dataset.i]; inp.value=x.label; ul.hidden=true;
+    if (x.gid) {
+      inp._pick=null; inp.disabled=true;
+      try { const d = await gDetails(x); inp._pick = d; inp.value = d.label; } catch(err) { inp._pick = null; }
+      inp.disabled=false;
+    } else inp._pick=x;
+  });
   inp.addEventListener('blur', ()=>setTimeout(()=>{ ul.hidden=true; }, 150));
   inp.addEventListener('keydown', e=>{ if (e.key==='Escape') ul.hidden=true; });
 }
@@ -898,7 +942,7 @@ function renderRoute(){
   if (!ROUTE || !S.length) { $('rtHero').innerHTML=''; $('rtList').innerHTML=''; $('rtLh').hidden=true; $('rtNote').textContent=''; return; }
   const out = routeCandidates(), L=+set.tank||50;
   const dur = ROUTE.min ? ` · ${Math.floor(ROUTE.min/60)} h ${String(Math.round(ROUTE.min%60)).padStart(2,'0')}` : '';
-  $('rtNote').textContent = `Trajet ${ROUTE.from.label} → ${ROUTE.to.label} : ${Math.round(ROUTE.km)} km${dur}.` + (ROUTE.approx ? ' Le serveur d\'itinéraires ne répondait pas : trajet approximatif en ligne droite.' : ' Itinéraire et adresses © OpenStreetMap (OSRM, Photon).');
+  $('rtNote').textContent = `Trajet ${ROUTE.from.label} → ${ROUTE.to.label} : ${Math.round(ROUTE.km)} km${dur}.` + (ROUTE.approx ? ' Le serveur d\'itinéraires ne répondait pas : trajet approximatif en ligne droite.' : ' Itinéraire © OpenStreetMap (OSRM).');
   if (!out.length) { $('rtHero').innerHTML = `<p class="empty">Aucune station n'affiche de ${FUEL[set.fuel].toLowerCase()} à ${set.det} km ou moins de ta route. Essaie un détour plus grand.</p>`; $('rtList').innerHTML=''; $('rtLh').hidden=true; return; }
   const t = out[0], avgCost = out.reduce((a,o)=>a+o.cost,0)/out.length, avg = out.reduce((a,o)=>a+o.p,0)/out.length, net = avgCost - t.cost;
   $('rtHero').innerHTML = `<div class="hero">
