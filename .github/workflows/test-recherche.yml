@@ -1,0 +1,20 @@
+name: Test de recherche d'adresse
+
+on:
+  workflow_dispatch:
+    inputs:
+      q:
+        description: "Texte à chercher"
+        default: "Barbierista"
+
+jobs:
+  recherche:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Chercher dans Photon
+        env:
+          Q: ${{ inputs.q }}
+        run: |
+          curl -sS -G "https://photon.komoot.io/api/" --data-urlencode "q=$Q" -d lang=fr -d limit=8 \
+            -d bbox=-80,44.5,-57,62.5 -d lat=45.556 -d lon=-73.748 -A "essence-quebec (test)" \
+          | python3 -c "import sys,json; fs=json.load(sys.stdin)['features']; print(len(fs),'résultat(s)'); [print('RES', {k:f['properties'].get(k) for k in ('name','osm_key','osm_value','housenumber','street','city','postcode')}) for f in fs]"
