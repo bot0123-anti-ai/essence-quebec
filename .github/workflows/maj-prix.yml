@@ -36,18 +36,26 @@ jobs:
         continue-on-error: true
         run: python scripts/maj.py site/stations.json
 
-      # GitHub met en pause les tâches programmées d'un dépôt public sans activité depuis 60 jours.
-      # Un petit commit par jour garde le dépôt actif.
-      - name: Garder le dépôt actif
-        if: github.event_name == 'schedule'
+      - name: Historique des prix
+        continue-on-error: true
+        run: python scripts/historique.py
+
+      - name: Alertes de prix
+        continue-on-error: true
+        run: python scripts/alertes.py ${{ steps.regie.outcome }}
+
+      # Enregistre l'état des alertes et la copie quotidienne de l'historique.
+      # Ce commit garde aussi le dépôt actif (GitHub met en pause les tâches
+      # programmées d'un dépôt public inactif depuis 60 jours).
+      - name: Enregistrer dans le dépôt
+        continue-on-error: true
         run: |
-          d=$(date -u +%F)
-          if [ "$(cat derniere-activite.txt 2>/dev/null)" != "$d" ]; then
-            echo "$d" > derniere-activite.txt
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add derniere-activite.txt
-            git commit -m "Activité $d"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/
+          if ! git diff --cached --quiet; then
+            git commit -m "Données $(date -u +'%F %H:%M')"
+            git pull --rebase -X theirs origin main || true
             git push
           fi
 

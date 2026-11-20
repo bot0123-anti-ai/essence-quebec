@@ -8,7 +8,9 @@ On essaie la tranche actuelle, puis on recule jusqu'à 2 heures.
 import datetime as dt
 import io
 import json
+import os
 import sys
+import time
 import unicodedata
 import urllib.error
 import urllib.request
@@ -17,7 +19,7 @@ import openpyxl
 
 BASE = "https://regieessencequebec.ca/data/stations-{:%Y%m%d%H%M%S}.xlsx"
 COLS = ["banniere", "nom", "adresse", "code postal", "latitude", "longitude",
-        "prix regulier", "prix super", "prix diesel"]
+        "prix regulier", "prix super", "prix diesel", "region"]
 
 
 def norm(s):
@@ -55,7 +57,8 @@ def convert(data):
             continue
         out.append([str(get(ix[0]) or ""), str(get(ix[1]) or ""), str(get(ix[2]) or ""),
                     str(get(ix[3]) or ""), round(lat, 5), round(lon, 5),
-                    price(get(ix[6])), price(get(ix[7])), price(get(ix[8]))])
+                    price(get(ix[6])), price(get(ix[7])), price(get(ix[8])),
+                    str(get(ix[9]) or "")])
     return out
 
 
@@ -89,7 +92,27 @@ def main(dest):
         print(f"{len(stations)} stations — {url}")
         return 0
     print("Aucun fichier trouvé dans les 2 dernières heures.")
+    garder_version_en_ligne(dest)
     return 1
+
+
+def garder_version_en_ligne(dest):
+    """Si la Régie ne répond pas, on garde les prix déjà publiés (plus récents que ceux du dépôt)."""
+    repo = os.environ.get("GITHUB_REPOSITORY", "")
+    if "/" not in repo:
+        return
+    owner, name = repo.split("/", 1)
+    url = f"https://{owner.lower()}.github.io/{name}/stations.json?t={int(time.time())}"
+    try:
+        live = json.load(urllib.request.urlopen(url, timeout=20))
+        with open(dest, encoding="utf-8") as f:
+            local = json.load(f)
+        if live.get("ts", "") > local.get("ts", "") and len(live.get("stations", [])) > 500:
+            with open(dest, "w", encoding="utf-8") as f:
+                json.dump(live, f, ensure_ascii=False, separators=(",", ":"))
+            print("Prix déjà publiés conservés :", live["ts"])
+    except Exception as e:
+        print("Version en ligne indisponible :", e)
 
 
 if __name__ == "__main__":
