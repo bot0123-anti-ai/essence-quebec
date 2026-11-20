@@ -14,7 +14,7 @@
    IDEA: le conseil d'un ami : « Va faire le plein chez Costco »
    PICTURE: le nom de la station et le prix en très grand, gros bouton vert « Y aller »
    COLOUR and TYPE: blanc, encre, gris doux, vert pour l'action et l'économie; police du téléphone
-   LAYOUT: une colonne (max 520px), filtres cachés derrière l'icône réglages, barre d'onglets en bas */
+   LAYOUT: une colonne (max 520px), choix visibles en haut (contrôles segmentés), véhicule sous la liste, onglets en bas */
 :root{color-scheme:light dark;--bg:light-dark(#fff,#0e0f11);--ink:light-dark(#111214,#f3f4f6);--mute:light-dark(#6b7280,#9ca3af);--line:light-dark(#ececef,#24262b);--soft:light-dark(#f4f5f7,#191b1f);--card:light-dark(#fff,#15171a);--green:light-dark(#16a34a,#15803d);--gtext:light-dark(#15803d,#4ade80);--gsoft:light-dark(#e9f7ee,#12261a);--amber:light-dark(#b45309,#fbbf24);--red:light-dark(#dc2626,#f87171)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
@@ -36,9 +36,11 @@ svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke
 .panel{background:var(--soft);border-radius:18px;padding:14px;display:grid;gap:14px;margin-top:6px}
 .panel[hidden]{display:none}
 .grp>span{display:block;font-size:13px;color:var(--mute);margin-bottom:6px}
-.seg{display:flex;flex-wrap:wrap;gap:6px}
-.seg button{font:inherit;font-size:14px;font-weight:500;min-height:40px;padding:0 14px;border-radius:99px;border:0;background:var(--card);color:var(--ink);cursor:pointer}
-.seg button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.ctl{display:grid;gap:8px;margin-top:8px}
+.seg{display:flex;gap:2px;background:var(--soft);border-radius:12px;padding:3px}
+.seg button{flex:1 1 0;font:inherit;font-size:14px;font-weight:500;min-height:40px;padding:0 6px;border-radius:10px;border:0;background:transparent;color:var(--mute);cursor:pointer;white-space:nowrap}
+.seg button[aria-pressed=true]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px #0000001f}
+body[data-tab=trend] .hide-trend,body[data-tab=alert] .hide-alert{display:none}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
 input[type=text],input[type=number],select{font:inherit;font-size:16px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 12px;min-height:44px;flex:1 1 140px;width:100%}
 label.f{display:grid;gap:4px;font-size:13px;color:var(--mute);flex:1 1 130px}
@@ -58,7 +60,7 @@ label.ck{display:flex;gap:8px;align-items:center;font-size:15px;min-height:32px}
 .msg:empty{display:none}
 .chipsum{display:inline-flex;align-items:center;gap:6px;margin-top:10px;background:var(--soft);border:0;border-radius:99px;padding:6px 12px;font:inherit;font-size:13px;color:var(--mute);cursor:pointer}
 .chipsum b{color:var(--ink);font-weight:600}
-.hero .lead{margin:22px 0 0;font-size:16px;color:var(--mute)}
+.hero .lead{margin:20px 0 0;font-size:16px;color:var(--mute)}
 .hero .name{margin:0;font-size:32px;font-weight:700;line-height:1.15;letter-spacing:-.01em}
 .hero .addr{margin:2px 0 0;font-size:14px;color:var(--mute)}
 .hero .price{margin:12px 0 0;font-size:60px;font-weight:700;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
@@ -92,7 +94,7 @@ h2.t{font-size:26px;font-weight:700;margin:20px 0 0;letter-spacing:-.01em}
 .fig{position:relative;height:220px;margin-top:12px}.fig>svg{position:absolute;inset:0;width:100%;height:100%;color:var(--ink)}
 .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--mute);margin-top:6px}
 .legend i{display:inline-block;width:16px;height:3px;vertical-align:middle;margin-right:6px;border-radius:2px}
-#rng{margin-top:14px}#rng button{background:var(--soft)}#rng button[aria-pressed=true]{background:var(--ink)}
+#rng{margin-top:14px}
 .alhead{display:flex;justify-content:space-between;align-items:center;gap:16px}
 .grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:14px}
 ol.steps{padding-left:20px;margin:14px 0 0;display:grid;gap:12px}
@@ -113,7 +115,6 @@ code{background:var(--soft);border-radius:6px;padding:1px 6px;overflow-wrap:anyw
       <svg class="i" viewBox="0 0 24 24"><path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0-6 0"/><path d="M17.66 16.66l-4.24 4.24a2 2 0 0 1-2.83 0l-4.25-4.24a8 8 0 1 1 11.32 0z"/></svg>
       <span><b id="poslbl">…</b> · <span class="fresh" id="freshBox"><span class="dot"></span><span id="fresh">chargement…</span></span></span>
     </button>
-    <button class="ibtn" id="filtBtn" type="button" aria-expanded="false" aria-controls="filt" aria-label="Réglages"><svg class="i" viewBox="0 0 24 24"><path d="M4 6h8M16 6h4M4 12h2M10 12h10M4 18h11M19 18h1"/><circle cx="14" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg></button>
   </div>
   <label class="lnk" for="file" id="impLbl" hidden>Prix pas à jour · importer le fichier de la Régie</label>
   <input type="file" id="file" accept=".xlsx,.xls,.csv" hidden>
@@ -132,15 +133,27 @@ code{background:var(--soft);border-radius:6px;padding:1px 6px;overflow-wrap:anyw
     <datalist id="cities"></datalist>
   </form>
 
-  <div class="panel" id="filt" hidden>
-    <div class="grp"><span>Carburant</span><div class="seg" data-k="fuel">
-      <button type="button" data-v="0">Régulier</button><button type="button" data-v="1">Super</button><button type="button" data-v="2">Diesel</button></div></div>
-    <div class="grp"><span>Distance maximum</span><div class="seg" data-k="radius">
-      <button type="button" data-v="3">3 km</button><button type="button" data-v="5">5 km</button><button type="button" data-v="10">10 km</button><button type="button" data-v="25">25 km</button></div></div>
-    <div class="grp"><span>Trier par</span><div class="seg" data-k="sort">
-      <button type="button" data-v="best">Meilleur choix</button><button type="button" data-v="price">Moins cher</button><button type="button" data-v="dist">Plus proche</button></div></div>
-    <div class="grp"><span>Mon véhicule</span>
-      <div class="row">
+  <div class="ctl hide-alert">
+    <div class="seg" data-k="fuel" role="group" aria-label="Carburant">
+      <button type="button" data-v="0">Régulier</button><button type="button" data-v="1">Super</button><button type="button" data-v="2">Diesel</button></div>
+    <div class="seg hide-trend" data-k="radius" role="group" aria-label="Distance maximum">
+      <button type="button" data-v="3">3 km</button><button type="button" data-v="5">5 km</button><button type="button" data-v="10">10 km</button><button type="button" data-v="25">25 km</button></div>
+    <div class="seg hide-trend" data-k="sort" role="group" aria-label="Trier par">
+      <button type="button" data-v="best">Meilleur choix</button><button type="button" data-v="price">Moins cher</button><button type="button" data-v="dist">Plus proche</button></div>
+  </div>
+
+  <p id="status" role="status"></p>
+
+  <div id="v-list">
+    <div id="hero"></div>
+    <h3 id="lh">Autres choix proches</h3>
+    <p class="note" id="lsub" style="margin:0 0 6px"></p>
+    <ul class="list" id="list"></ul>
+    <button class="b o more" id="moreBtn" type="button" hidden>Voir plus</button>
+
+    <div class="card" id="veh">
+      <b>Mon véhicule</b>
+      <div class="row" style="margin-top:10px">
         <label class="f">Réservoir (litres)<input type="number" id="tank" min="10" max="200" step="1" inputmode="numeric"></label>
         <label class="f">Conso. (L/100 km)<input type="number" id="cons" min="2" max="30" step="0.1" inputmode="decimal"></label>
       </div>
@@ -151,20 +164,8 @@ code{background:var(--soft);border-radius:6px;padding:1px 6px;overflow-wrap:anyw
         <label class="f">Modèle<select id="carModel" disabled><option value="">Choisir…</option></select></label>
         <label class="f">Année<select id="carYear" disabled><option value="">Choisir…</option></select></label>
       </div>
+      <div class="swrow" style="margin-top:12px;border-top:1px solid var(--line);padding-top:12px"><span>Inclure Costco <span class="ad" style="display:inline">(membres seulement)</span></span><button class="sw" id="costcoSw" role="switch" aria-checked="true" aria-label="Inclure Costco" type="button"></button></div>
     </div>
-    <div class="swrow"><span>Inclure Costco <span class="ad" style="display:inline">(membres)</span></span><button class="sw" id="costcoSw" role="switch" aria-checked="true" aria-label="Inclure Costco" type="button"></button></div>
-    <button class="b dark" id="filtDone" type="button">OK</button>
-  </div>
-
-  <p id="status" role="status"></p>
-
-  <div id="v-list">
-    <button class="chipsum" id="sumBtn" type="button"><span id="sum"></span></button>
-    <div id="hero"></div>
-    <h3 id="lh">Autres choix proches</h3>
-    <p class="note" id="lsub" style="margin:0 0 6px"></p>
-    <ul class="list" id="list"></ul>
-    <button class="b o more" id="moreBtn" type="button" hidden>Voir plus</button>
   </div>
 
   <div id="v-map" hidden>
@@ -326,10 +327,8 @@ function render(){
   $('poslbl').textContent = pos.label + (home && home.label===pos.label ? ' · chez moi' : '');
   const {out, avg, L} = compute();
   OUT = out;
-  const sortLbl = {best:'meilleur choix',price:'moins cher',dist:'plus proche'}[set.sort];
-  $('sum').innerHTML = `<b>${FUEL[set.fuel]}</b> · ${set.radius} km · ${sortLbl} · <u>modifier</u>`;
   if (!out.length) {
-    $('hero').innerHTML = `<p class="empty">Aucune station n'affiche de ${FUEL[set.fuel].toLowerCase()} à ${set.radius} km ou moins. Touche les réglages pour agrandir la distance.</p>`;
+    $('hero').innerHTML = `<p class="empty">Aucune station n'affiche de ${FUEL[set.fuel].toLowerCase()} à ${set.radius} km ou moins. Choisis une plus grande distance.</p>`;
     $('list').innerHTML=''; $('lh').hidden=true; $('lsub').textContent=''; $('moreBtn').hidden=true;
   } else {
     const t=out[0], save=(avg-t.p)/100*L;
@@ -341,7 +340,7 @@ function render(){
       <p class="price">${fmt1(t.p)}<small> ¢/L</small></p>
       <p class="gain">${km(t.d)} · ${save>=0.05 ? `tu sauves ${money(save)} sur ton plein` : `prix moyen du coin : ${fmt1(avg)} ¢`}</p>
       <a class="b go" href="${maps(t.s)}" target="_blank" rel="noopener"><svg class="i" viewBox="0 0 24 24"><path d="M12 18.5l7.3 2.5a.5.5 0 0 0 .6-.7L12 3l-7.9 17.3a.5.5 0 0 0 .6.7z"/></svg>Y aller</a>
-      <p class="cost">Plein de ${L} L : ${money(t.cost)}${set.car ? ' · '+esc(set.car) : ''}</p></div>`;
+      <p class="cost">Plein de ${L} L : ${money(t.cost)}${set.car ? ' · '+esc(set.car) : ''} · <a href="#veh" style="color:inherit">modifier</a></p></div>`;
     const rest = out.slice(1, 61), shown = showAll ? rest : rest.slice(0, 8);
     $('lh').hidden = !rest.length;
     $('lsub').textContent = '';
@@ -598,12 +597,8 @@ function usePos(p, asHome){
   $('posform').hidden=true; $('perr').textContent=''; $('setHome').checked=false;
   render();
 }
-function openFilt(open){ $('filt').hidden=!open; $('filtBtn').setAttribute('aria-expanded', String(open)); if (open) { $('posform').hidden=true; window.scrollTo({top:0,behavior:'smooth'}); } }
-$('filtBtn').addEventListener('click', ()=>openFilt($('filt').hidden));
-$('filtDone').addEventListener('click', ()=>openFilt(false));
-$('sumBtn').addEventListener('click', ()=>openFilt(true));
 $('moreBtn').addEventListener('click', ()=>{ showAll=true; render(); });
-$('chg').addEventListener('click', ()=>{ const f=$('posform'); f.hidden=!f.hidden; if(!f.hidden) { openFilt(false); $('q').focus(); } });
+$('chg').addEventListener('click', ()=>{ const f=$('posform'); f.hidden=!f.hidden; if(!f.hidden) $('q').focus(); });
 $('homeBtn').addEventListener('click', ()=>{ if (home) usePos(home); });
 $('posform').addEventListener('submit', e=>{
   e.preventDefault();
