@@ -94,6 +94,10 @@ h3{font-size:14px;font-weight:600;color:var(--mute);margin:26px 0 4px}
 .sug button{display:block;width:100%;text-align:left;background:none;border:0;padding:10px;font:inherit;font-size:15px;color:var(--ink);border-radius:8px;cursor:pointer;min-height:44px}
 .sug button:hover,.sug button:focus-visible{background:var(--soft)}
 .sug small{display:block;color:var(--mute);font-size:12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.chips:empty{display:none}
+.chip{display:inline-flex;align-items:center;gap:4px;background:var(--soft);border:0;border-radius:99px;padding:0 4px 0 12px;min-height:40px;font:inherit;font-size:14px;color:var(--ink)}
+.chip button{background:none;border:0;font:inherit;color:inherit;cursor:pointer;min-height:40px;padding:0 4px}
+.chip .x{color:var(--mute);font-size:18px;width:32px}
 .rlist{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:4px}
 .rlist li{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:15px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:16px}
@@ -210,6 +214,17 @@ code{background:var(--soft);border-radius:6px;padding:1px 6px;overflow-wrap:anyw
         <button type="button" data-v="1">1 km</button><button type="button" data-v="3">3 km</button><button type="button" data-v="5">5 km</button></div></div>
       <p class="err" id="rtErr"></p>
     </form>
+    <div class="card" id="places">
+      <b>Mes lieux</b>
+      <p class="note" style="margin-top:2px">Un endroit introuvable par son nom (ton barbier, le travail…) ? Entre son adresse une fois et donne-lui un nom.</p>
+      <div class="chips" id="plChips"></div>
+      <div class="row" style="margin-top:10px">
+        <label class="f">Nom<input type="text" id="plName" placeholder="Barbier" maxlength="40" autocomplete="off"></label>
+        <label class="f" style="flex:2 1 200px">Adresse<div class="ac"><input type="text" id="plAddr" placeholder="1818 boul. de la Côte-Vertu, Saint-Laurent" autocomplete="off"></div></label>
+        <button class="b dark" id="plAdd" type="button">Enregistrer</button>
+      </div>
+      <p class="err" id="plErr" style="margin-top:6px"></p>
+    </div>
     <div id="rtHero"></div>
     <h3 id="rtLh" hidden>Autres arrêts possibles</h3>
     <ul class="list" id="rtList"></ul>
@@ -755,9 +770,11 @@ $('carYear').addEventListener('change', ()=>{
 const POSTAL = /^[a-z]\d[a-z]\s?(\d[a-z]\d)?$/i;
 let acCtl = null;
 function fmtPlace(p){
-  const l1 = p.housenumber && p.street ? `${p.housenumber} ${p.street}` : (p.name || p.street || '');
+  const street = p.housenumber && p.street ? `${p.housenumber} ${p.street}` : (p.street || '');
+  const named = p.name && p.name!==p.street && !['place','highway','boundary'].includes(p.osm_key);
   const city = p.city || p.town || p.village || p.locality || p.district || '';
-  return [l1, city && city!==l1 ? city : '', p.state && p.state!=='Québec' ? p.state : ''].filter(Boolean).join(', ');
+  const parts = named ? [p.name, street] : [street || p.name || ''];
+  return [...parts, city && !parts.includes(city) ? city : '', p.state && p.state!=='Québec' ? p.state : ''].filter(Boolean).join(', ');
 }
 async function photon(q){
   if (acCtl) acCtl.abort();
@@ -769,8 +786,11 @@ async function photon(q){
   return (j.features||[]).map(f=>({lat:f.geometry.coordinates[1], lon:f.geometry.coordinates[0], label:fmtPlace(f.properties||{})}))
     .filter(x=>x.label && !seen.has(x.label) && seen.add(x.label));
 }
+let PLACES = store.get('places', []);
+function myPlaces(q){ const n=norm(q); return PLACES.filter(p=>norm(p.name).includes(n) || norm(p.label).includes(n)).map(p=>({...p, mine:true})); }
 async function geocode(q){
   q = q.trim(); if (!q) return null;
+  const exact = PLACES.find(p=>norm(p.name)===norm(q)); if (exact) return exact;
   if (POSTAL.test(q)) return locate(q);
   try { const r = await photon(q); if (r.length) return r[0]; } catch(e) {}
   return locate(q);
@@ -781,14 +801,16 @@ function attachAC(inp){
   inp.addEventListener('input', ()=>{
     inp._pick = null; clearTimeout(t);
     const q = inp.value.trim();
-    if (q.length<3) { ul.hidden=true; return; }
+    if (q.length<2) { ul.hidden=true; return; }
     t = setTimeout(async ()=>{
       let r = [];
+      if (q.length<3) { const mine=myPlaces(q); items=mine; ul.innerHTML=mine.map((x,i)=>`<li><button type="button" data-i="${i}">★ ${esc(x.name)}<small>${esc(x.label)}</small></button></li>`).join(''); ul.hidden=!mine.length; return; }
       if (!POSTAL.test(q)) { try { r = await photon(q); } catch(e) { if (e.name==='AbortError') return; } }
       const loc = locate(q); if (loc && !r.some(x=>x.label===loc.label)) r.push(loc);
       if (inp.value.trim()!==q) return;
-      items = r.slice(0,6);
-      ul.innerHTML = items.map((x,i)=>`<li><button type="button" data-i="${i}">${esc(x.label)}</button></li>`).join('');
+      const mine = myPlaces(q);
+      items = [...mine, ...r].slice(0,7);
+      ul.innerHTML = items.map((x,i)=>`<li><button type="button" data-i="${i}">${x.mine ? `★ ${esc(x.name)}<small>${esc(x.label)}</small>` : esc(x.label)}</button></li>`).join('');
       ul.hidden = !items.length;
     }, 400);
   });
@@ -797,7 +819,28 @@ function attachAC(inp){
   inp.addEventListener('blur', ()=>setTimeout(()=>{ ul.hidden=true; }, 150));
   inp.addEventListener('keydown', e=>{ if (e.key==='Escape') ul.hidden=true; });
 }
-for (const id of ['q','rtFrom','rtTo']) attachAC($(id));
+for (const id of ['q','rtFrom','rtTo','plAddr']) attachAC($(id));
+function renderPlaces(){
+  $('plChips').innerHTML = PLACES.map((p,i)=>`<span class="chip"><button type="button" data-go="${i}" title="${esc(p.label)}">★ ${esc(p.name)}</button><button type="button" class="x" data-rm="${i}" aria-label="Supprimer ${esc(p.name)}">×</button></span>`).join('');
+}
+$('plChips').addEventListener('click', e=>{
+  const go=e.target.closest('[data-go]'), rm=e.target.closest('[data-rm]');
+  if (rm) { PLACES.splice(+rm.dataset.rm,1); store.set('places',PLACES); renderPlaces(); return; }
+  if (go) { const p=PLACES[+go.dataset.go]; $('rtTo').value=p.name; $('rtTo')._pick=p; $('rtForm').requestSubmit(); }
+});
+$('plAdd').addEventListener('click', async ()=>{
+  const name=$('plName').value.trim(), aq=$('plAddr').value.trim();
+  $('plErr').style.color='';
+  if (!name) { $('plErr').textContent='Donne un nom à ce lieu.'; return; }
+  if (!aq) { $('plErr').textContent='Entre l\'adresse du lieu.'; return; }
+  $('plErr').textContent='Recherche de l\'adresse…';
+  const p = $('plAddr')._pick || await geocode(aq);
+  if (!p) { $('plErr').textContent='Adresse introuvable. Essaie avec le numéro, la rue et la ville.'; return; }
+  PLACES = PLACES.filter(x=>norm(x.name)!==norm(name)).concat([{name, label:p.label, lat:p.lat, lon:p.lon}]);
+  store.set('places', PLACES); $('plName').value=''; $('plAddr').value=''; $('plAddr')._pick=null;
+  $('plErr').textContent=`« ${name} » enregistré. Touche-le pour calculer le trajet.`; $('plErr').style.color='var(--gtext)'; renderPlaces();
+});
+renderPlaces();
 
 /* ---------- Trajet ---------- */
 let ROUTE = store.get('route', null);
@@ -849,9 +892,9 @@ function rtRow(o, avg){
     <div class="pr${o.p < avg-0.5 ? ' g' : ''}">${fmt1(o.p)}<small>${o.disc ? 'rabais −'+fmt1(o.disc)+' ¢' : money(o.cost)}</small></div></a>${starBtn(o.s)}</li>`;
 }
 function renderRoute(){
-  $('rtFrom').placeholder = pos ? `Ma position (${pos.label})` : 'Ma position';
+  $('rtFrom').placeholder = pos && !/^(ma|dernière) position$/i.test(pos.label) ? `Ma position (${pos.label})` : 'Ma position';
   if (ROUTE && ROUTE.fromCustom && document.activeElement!==$('rtFrom') && !$('rtFrom').value) $('rtFrom').value = ROUTE.from.label;
-  if (ROUTE && document.activeElement!==$('rtTo') && !$('rtTo').value) $('rtTo').value = ROUTE.to.label.replace(/ \((centre|secteur)\)$/,'');
+  if (ROUTE && document.activeElement!==$('rtTo') && !$('rtTo').value) $('rtTo').value = ROUTE.to.name || ROUTE.to.label.replace(/ \((centre|secteur)\)$/,'');
   if (!ROUTE || !S.length) { $('rtHero').innerHTML=''; $('rtList').innerHTML=''; $('rtLh').hidden=true; $('rtNote').textContent=''; return; }
   const out = routeCandidates(), L=+set.tank||50;
   const dur = ROUTE.min ? ` · ${Math.floor(ROUTE.min/60)} h ${String(Math.round(ROUTE.min%60)).padStart(2,'0')}` : '';
@@ -879,7 +922,7 @@ $('rtForm').addEventListener('submit', async e=>{
   if (!f) { $('rtErr').textContent = fromCustom ? 'Départ introuvable. Essaie une adresse complète, une ville ou un code postal.' : 'Choisis ton point de départ.'; return; }
   const t = $('rtTo')._pick || await geocode($('rtTo').value);
   if (!t) { $('rtErr').textContent='Destination introuvable. Essaie une adresse complète (ex. 2450 boul. Laurier, Québec), une ville ou un code postal.'; return; }
-  const to = {lat:t.lat, lon:t.lon, label:t.label};
+  const to = {lat:t.lat, lon:t.lon, label: t.name ? `${t.name} (${t.label})` : t.label, name: t.name || ''};
   $('rtErr').textContent='Calcul de l\'itinéraire…';
   const from = {lat:f.lat, lon:f.lon, label:fromCustom ? f.label : f.label};
   const r = await getRoute(from, to);
