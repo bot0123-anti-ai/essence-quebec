@@ -1,0 +1,61 @@
+name: Mise à jour des prix
+
+on:
+  schedule:
+    - cron: "7,22,37,52 * * * *"   # aux 15 minutes
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  maj:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install openpyxl==3.1.5
+
+      - name: Télécharger le fichier de la Régie
+        id: regie
+        continue-on-error: true
+        run: python scripts/maj.py site/stations.json
+
+      # GitHub met en pause les tâches programmées d'un dépôt public sans activité depuis 60 jours.
+      # Un petit commit par jour garde le dépôt actif.
+      - name: Garder le dépôt actif
+        if: github.event_name == 'schedule'
+        run: |
+          d=$(date -u +%F)
+          if [ "$(cat derniere-activite.txt 2>/dev/null)" != "$d" ]; then
+            echo "$d" > derniere-activite.txt
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add derniere-activite.txt
+            git commit -m "Activité $d"
+            git push
+          fi
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
