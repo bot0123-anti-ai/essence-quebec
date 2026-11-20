@@ -36,7 +36,7 @@ h1{font-size:26px;font-weight:800;line-height:1.15;margin:4px 0 8px;letter-spaci
 main.in{margin-top:-36px;display:grid;gap:14px}
 .card{background:var(--card);border-radius:22px;padding:16px;box-shadow:0 2px 10px #3a241014}
 form.card{display:grid;gap:10px}form[hidden]{display:none}
-.row{display:flex;gap:8px;flex-wrap:wrap}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
 input[type=text],input[type=number],select{font:16px Nunito,system-ui,sans-serif;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:14px;padding:9px 12px;min-height:46px;flex:1 1 150px;width:100%}
 .b{display:inline-flex;align-items:center;justify-content:center;gap:6px;font:800 15px Nunito,system-ui,sans-serif;min-height:46px;padding:0 18px;border-radius:99px;border:0;background:var(--or);color:#fff;cursor:pointer;text-decoration:none}
 .b.o{background:var(--chip);color:var(--ink);border:1.5px solid var(--line)}
@@ -148,6 +148,24 @@ body[data-tab=trend] .hide-trend,body[data-tab=alert] .hide-alert{display:none}
       <button type="button" data-v="best">Meilleur choix</button><button type="button" data-v="price">Moins cher</button><button type="button" data-v="dist">Plus proche</button></div>
   </div>
 
+  <details class="card hide-trend hide-alert" id="optBox">
+    <summary>Mon véhicule et options</summary>
+    <div class="opt">
+      <div class="row">
+        <label class="f">Mon réservoir (litres)<input type="number" id="tank" min="10" max="200" step="1" inputmode="numeric"></label>
+        <label class="f">Consommation (L/100 km)<input type="number" id="cons" min="2" max="30" step="0.1" inputmode="decimal"></label>
+      </div>
+      <p class="note" id="carNote" style="margin:0"></p>
+      <button class="lnk" id="carToggle" type="button" style="justify-self:start;font-weight:800">Je ne connais pas mon réservoir</button>
+      <div class="row" id="carPick" hidden>
+        <label class="f">Marque<select id="carMake"><option value="">Choisir…</option></select></label>
+        <label class="f">Modèle<select id="carModel" disabled><option value="">Choisir…</option></select></label>
+      </div>
+      <div class="swrow"><span>Inclure Costco <span class="ad">(membres seulement)</span></span><button class="sw" id="costcoSw" role="switch" aria-checked="true" aria-label="Inclure Costco" type="button"></button></div>
+      <p class="note" style="margin:0">« Meilleur choix » compte le prix du plein et l'essence brûlée pour l'aller-retour (distance à vol d'oiseau × 1,3).</p>
+    </div>
+  </details>
+
   <div id="v-list">
     <h3 id="lh">Autres stations</h3>
     <p class="sub" id="lsub"></p>
@@ -186,17 +204,6 @@ body[data-tab=trend] .hide-trend,body[data-tab=alert] .hide-alert{display:none}
     <p class="note">Vérifiée aux 15 minutes, une seule notification par baisse sous ton prix. Ta zone est arrondie à environ 2 km; aucun nom ni courriel n'est envoyé. L'alerte reste active tant que tu ouvres l'appli au moins une fois tous les 3 mois.</p>
   </div>
 
-  <details class="card hide-trend hide-alert">
-    <summary>Options</summary>
-    <div class="opt">
-      <div class="swrow"><span>Inclure Costco <span class="ad">(membres seulement)</span></span><button class="sw" id="costcoSw" role="switch" aria-checked="true" aria-label="Inclure Costco" type="button"></button></div>
-      <div class="row">
-        <label class="f">Plein (litres)<input type="number" id="tank" min="10" max="200" step="1"></label>
-        <label class="f">Consommation (L/100 km)<input type="number" id="cons" min="2" max="30" step="0.1"></label>
-      </div>
-      <p class="note" style="margin:0">« Meilleur choix » compte le prix du plein et l'essence brûlée pour l'aller-retour (distance à vol d'oiseau × 1,3).</p>
-    </div>
-  </details>
 
   <p class="note">Prix de la Régie de l'énergie du Québec. Les stations qui vendent moins de 500 000 L par an ne sont pas tenues d'afficher leurs prix.</p>
 </main>
@@ -313,7 +320,8 @@ const maps = s => `https://www.google.com/maps/dir/?api=1&destination=${s.lat},$
 function render(){
   for (const g of document.querySelectorAll('.seg[data-k]')) for (const b of g.children) b.setAttribute('aria-pressed', String(String(set[g.dataset.k])===b.dataset.v));
   $('costcoSw').setAttribute('aria-checked', String(!!set.costco));
-  $('tank').value=set.tank; $('cons').value=set.cons;
+  if (document.activeElement!==$('tank')) $('tank').value=set.tank;
+  if (document.activeElement!==$('cons')) $('cons').value=set.cons;
   $('homeBtn').hidden = !home || (pos && home.label===pos.label);
   $('gps').hidden = !gpsOk || (pos && pos.label==='Ma position');
   if (!pos || !S.length) { $('poslbl').textContent='—'; $('hero').innerHTML=''; $('list').innerHTML=''; return; }
@@ -330,7 +338,7 @@ function render(){
       <div class="pbox"><b>${fmt1(t.p)}</b><span>¢ le litre</span></div>
       <div><p class="lab">${tag} · ${FUEL[set.fuel]}</p><h2>${esc(title(t.s))}</h2><p class="ad">${esc(addr(t.s.a))}</p>
         ${save>=0.05 ? `<p class="save">▼ ${money(save)} de moins sur un plein</p>` : ''}</div>
-      <div class="act"><span>${km(t.d)} de toi · plein ${money(t.cost)}</span><a class="b" href="${maps(t.s)}" target="_blank" rel="noopener"><svg class="i" viewBox="0 0 24 24"><path d="M12 18.5l7.3 2.5a.5.5 0 0 0 .6-.7L12 3l-7.9 17.3a.5.5 0 0 0 .6.7z"/></svg>Y aller</a></div></div>`;
+      <div class="act"><span>${km(t.d)} de toi · plein de ${L} L : ${money(t.cost)}</span><a class="b" href="${maps(t.s)}" target="_blank" rel="noopener"><svg class="i" viewBox="0 0 24 24"><path d="M12 18.5l7.3 2.5a.5.5 0 0 0 .6-.7L12 3l-7.9 17.3a.5.5 0 0 0 .6.7z"/></svg>Y aller</a></div></div>`;
     const rest = out.slice(1, 61);
     $('lh').textContent = rest.length ? 'Autres stations' : 'Aucune autre station';
     $('lsub').textContent = `${out.length} station${out.length>1?'s':''} à ${set.radius} km · vert = bon prix` + (out.length>61 ? ' · 60 premières' : '');
@@ -612,6 +620,41 @@ async function gpsSetup(){
   if (st==='granted') gpsNow();
 }
 
+/* ---------- Véhicule : capacité du réservoir ---------- */
+// Capacités typiques des modèles récents (environ 2019 et plus), en litres. Varie selon l'année et la version.
+const CARS = {
+  'Chevrolet':[['Colorado',80],['Equinox',56],['Malibu',60],['Silverado 1500',91],['Trailblazer',50],['Traverse',82],['Trax',50]],
+  'Chrysler / Dodge':[['Grand Caravan (2011-2020)',76],['Pacifica',72]],
+  'Ford':[['Bronco Sport',61],['Edge',68],['Escape',56],['Explorer',68],['F-150 (réservoir standard)',87],['F-150 (grand réservoir)',136],['Maverick',52],['Ranger',68]],
+  'GMC':[['Sierra 1500',91],['Terrain',56]],
+  'Honda':[['Accord',56],['Civic',47],['CR-V',53],['HR-V',53],['Odyssey',74],['Pilot',74],['Ridgeline',74]],
+  'Hyundai':[['Elantra',47],['Kona',50],['Palisade',71],['Santa Fe',67],['Tucson',54],['Venue',45]],
+  'Jeep':[['Cherokee',60],['Compass',51],['Grand Cherokee',87],['Wrangler 2 portes',66],['Wrangler 4 portes',81]],
+  'Kia':[['Forte',53],['Seltos',50],['Sorento',67],['Soul',54],['Sportage',54],['Telluride',71]],
+  'Mazda':[['CX-30',48],['CX-5',56],['CX-50',60],['Mazda3',51]],
+  'Mitsubishi':[['Eclipse Cross',60],['Mirage',35],['Outlander',55],['RVR',60]],
+  'Nissan':[['Altima',61],['Frontier',80],['Kicks',41],['Pathfinder',74],['Qashqai',55],['Rogue',55],['Sentra',47],['Versa',41]],
+  'Ram':[['1500 (réservoir standard)',98],['1500 (grand réservoir)',125]],
+  'Subaru':[['Ascent',73],['Crosstrek',63],['Forester',63],['Impreza',50],['Outback',70]],
+  'Toyota':[['Camry',60],['C-HR',50],['Corolla',50],['Corolla Cross',47],['Highlander',68],['Prius',43],['RAV4',55],['Sienna',68],['Tacoma',80],['Tundra',85],['Venza',55]],
+  'Volkswagen':[['Atlas',70],['Golf',50],['Jetta',50],['Taos',50],['Tiguan',58]]
+};
+$('carMake').innerHTML += Object.keys(CARS).map(m=>`<option>${esc(m)}</option>`).join('');
+function carNote(){
+  $('carNote').textContent = set.car ? `${set.car} : environ ${set.tank} L (valeur typique des modèles récents, vérifie ton manuel au besoin).` : '';
+}
+$('carToggle').addEventListener('click', ()=>{ const p=$('carPick'); p.hidden=!p.hidden; if (!p.hidden) $('carMake').focus(); });
+$('carMake').addEventListener('change', ()=>{
+  const list = CARS[$('carMake').value] || [];
+  $('carModel').innerHTML = '<option value="">Choisir…</option>' + list.map(([n,l])=>`<option value="${l}">${esc(n)}</option>`).join('');
+  $('carModel').disabled = !list.length;
+});
+$('carModel').addEventListener('change', ()=>{
+  const l = +$('carModel').value; if (!l) return;
+  set.tank = l; set.car = `${$('carMake').value} ${$('carModel').selectedOptions[0].textContent}`;
+  store.set('set',set); carNote(); render();
+});
+
 /* ---------- Filtres ---------- */
 for (const g of document.querySelectorAll('.seg[data-k]')) g.addEventListener('click', e=>{
   const b=e.target.closest('button'); if (!b) return;
@@ -619,7 +662,8 @@ for (const g of document.querySelectorAll('.seg[data-k]')) g.addEventListener('c
   store.set('set',set); render();
 });
 $('costcoSw').addEventListener('click', ()=>{ set.costco = set.costco ? 0 : 1; store.set('set',set); render(); });
-for (const id of ['tank','cons']) $(id).addEventListener('input', e=>{ const v=parseFloat(e.target.value); if (v>0) { set[id]=v; store.set('set',set); render(); } });
+for (const id of ['tank','cons']) $(id).addEventListener('input', e=>{ const v=parseFloat(e.target.value); if (v>0) { set[id]=v; if (id==='tank') { set.car=''; carNote(); } store.set('set',set); render(); } });
+carNote();
 
 /* ---------- Chargement ---------- */
 let loadedAt = 0;
