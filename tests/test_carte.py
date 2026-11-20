@@ -26,7 +26,12 @@ async def main():
         tuiles = await pg.evaluate("document.querySelectorAll('.leaflet-tile-loaded').length")
         # Trajet Laval -> Québec avec le vrai serveur d'itinéraires
         await pg.click(".bnav button[data-t=route]")
-        await pg.fill("#rtTo", "Québec")
+        await pg.type("#rtTo", "2450 boulevard Laurier Québec", delay=40)
+        await pg.wait_for_timeout(2500)
+        sug = await pg.evaluate("[...document.querySelectorAll('#rtForm .sug button')].map(b=>b.textContent)")
+        print("Suggestions :", sug)
+        if sug:
+            await pg.click("#rtForm .sug li:first-child button")
         await pg.click("#rtForm button[type=submit]")
         await pg.wait_for_timeout(9000)
         await pg.screenshot(path="captures/trajet.png")

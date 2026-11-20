@@ -88,6 +88,12 @@ h3{font-size:14px;font-weight:600;color:var(--mute);margin:26px 0 4px}
 .hero .name .star{display:inline-grid;vertical-align:middle;margin-left:2px}
 .hero .rab{margin:6px 0 0;font-size:14px;color:var(--mute)}
 .hero .share{width:100%;margin-top:10px}
+.ac{position:relative;flex:1 1 180px}.ac input{width:100%}
+.sug{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:30;list-style:none;margin:0;padding:4px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px #00000026;max-height:300px;overflow:auto}
+.sug[hidden]{display:none}
+.sug button{display:block;width:100%;text-align:left;background:none;border:0;padding:10px;font:inherit;font-size:15px;color:var(--ink);border-radius:8px;cursor:pointer;min-height:44px}
+.sug button:hover,.sug button:focus-visible{background:var(--soft)}
+.sug small{display:block;color:var(--mute);font-size:12px}
 .rlist{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:4px}
 .rlist li{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:15px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:16px}
@@ -132,7 +138,7 @@ code{background:var(--soft);border-radius:6px;padding:1px 6px;overflow-wrap:anyw
 
   <form id="posform" class="panel" hidden>
     <div class="row">
-      <input type="text" id="q" list="cities" placeholder="Code postal ou ville (ex. H7N 1A1)" autocomplete="off">
+      <div class="ac"><input type="text" id="q" placeholder="Adresse, ville ou code postal" autocomplete="off" enterkeyhint="search"></div>
       <button class="b dark" type="submit">OK</button>
     </div>
     <div class="row" style="gap:16px">
@@ -197,11 +203,9 @@ code{background:var(--soft);border-radius:6px;padding:1px 6px;overflow-wrap:anyw
   <div id="v-route" hidden>
     <h2 class="t">Sur mon trajet</h2>
     <form class="card" id="rtForm" style="display:grid;gap:10px">
-      <p class="note" style="margin:0">Départ : <b id="rtFrom">ta position</b> · <button class="lnk" type="button" id="rtFromChg">changer</button></p>
-      <div class="row">
-        <input type="text" id="rtTo" list="cities" placeholder="Destination : ville ou code postal" autocomplete="off">
-        <button class="b dark" type="submit">Chercher</button>
-      </div>
+      <label class="f">Départ<div class="ac"><input type="text" id="rtFrom" placeholder="Ma position" autocomplete="off"></div></label>
+      <label class="f">Destination<div class="ac"><input type="text" id="rtTo" placeholder="Adresse, ville ou code postal" autocomplete="off" enterkeyhint="search"></div></label>
+      <button class="b dark" type="submit">Chercher</button>
       <div class="grp"><span>Détour maximum hors de la route</span><div class="seg" data-k="det">
         <button type="button" data-v="1">1 km</button><button type="button" data-v="3">3 km</button><button type="button" data-v="5">5 km</button></div></div>
       <p class="err" id="rtErr"></p>
@@ -672,11 +676,12 @@ function usePos(p, asHome){
 $('moreBtn').addEventListener('click', ()=>{ showAll=true; render(); });
 $('chg').addEventListener('click', ()=>{ const f=$('posform'); f.hidden=!f.hidden; if(!f.hidden) $('q').focus(); });
 $('homeBtn').addEventListener('click', ()=>{ if (home) usePos(home); });
-$('posform').addEventListener('submit', e=>{
+$('posform').addEventListener('submit', async e=>{
   e.preventDefault();
-  const p = locate($('q').value);
-  if (!p) { $('perr').textContent='Introuvable. Essaie un code postal (ex. H7N 1A1) ou une ville du Québec.'; return; }
-  usePos(p, $('setHome').checked); $('q').value='';
+  $('perr').textContent='Recherche…';
+  const p = $('q')._pick || await geocode($('q').value);
+  if (!p) { $('perr').textContent='Introuvable. Essaie une adresse complète (ex. 1500 boul. Curé-Labelle, Laval), une ville ou un code postal.'; return; }
+  usePos({lat:p.lat, lon:p.lon, label:p.label}, $('setHome').checked); $('q').value=''; $('q')._pick=null;
 });
 function gpsNow(){
   $('poslbl').textContent='Recherche de ta position…';
@@ -746,6 +751,54 @@ $('carYear').addEventListener('change', ()=>{
   store.set('set',set); carNote(); render();
 });
 
+/* ---------- Recherche d'adresses (Photon, données OpenStreetMap) ---------- */
+const POSTAL = /^[a-z]\d[a-z]\s?(\d[a-z]\d)?$/i;
+let acCtl = null;
+function fmtPlace(p){
+  const l1 = p.housenumber && p.street ? `${p.housenumber} ${p.street}` : (p.name || p.street || '');
+  const city = p.city || p.town || p.village || p.locality || p.district || '';
+  return [l1, city && city!==l1 ? city : '', p.state && p.state!=='Québec' ? p.state : ''].filter(Boolean).join(', ');
+}
+async function photon(q){
+  if (acCtl) acCtl.abort();
+  acCtl = new AbortController();
+  const bias = pos ? `&lat=${pos.lat.toFixed(3)}&lon=${pos.lon.toFixed(3)}` : '';
+  const r = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&lang=fr&limit=6&bbox=-80,44.5,-57,62.5${bias}`, {signal:acCtl.signal});
+  if (!r.ok) throw new Error(r.status);
+  const j = await r.json(), seen = new Set();
+  return (j.features||[]).map(f=>({lat:f.geometry.coordinates[1], lon:f.geometry.coordinates[0], label:fmtPlace(f.properties||{})}))
+    .filter(x=>x.label && !seen.has(x.label) && seen.add(x.label));
+}
+async function geocode(q){
+  q = q.trim(); if (!q) return null;
+  if (POSTAL.test(q)) return locate(q);
+  try { const r = await photon(q); if (r.length) return r[0]; } catch(e) {}
+  return locate(q);
+}
+function attachAC(inp){
+  const ul = document.createElement('ul'); ul.className='sug'; ul.hidden=true; inp.parentNode.appendChild(ul);
+  let t=0, items=[];
+  inp.addEventListener('input', ()=>{
+    inp._pick = null; clearTimeout(t);
+    const q = inp.value.trim();
+    if (q.length<3) { ul.hidden=true; return; }
+    t = setTimeout(async ()=>{
+      let r = [];
+      if (!POSTAL.test(q)) { try { r = await photon(q); } catch(e) { if (e.name==='AbortError') return; } }
+      const loc = locate(q); if (loc && !r.some(x=>x.label===loc.label)) r.push(loc);
+      if (inp.value.trim()!==q) return;
+      items = r.slice(0,6);
+      ul.innerHTML = items.map((x,i)=>`<li><button type="button" data-i="${i}">${esc(x.label)}</button></li>`).join('');
+      ul.hidden = !items.length;
+    }, 400);
+  });
+  ul.addEventListener('mousedown', e=>e.preventDefault());
+  ul.addEventListener('click', e=>{ const b=e.target.closest('button'); if (!b) return; const x=items[+b.dataset.i]; inp.value=x.label; inp._pick=x; ul.hidden=true; });
+  inp.addEventListener('blur', ()=>setTimeout(()=>{ ul.hidden=true; }, 150));
+  inp.addEventListener('keydown', e=>{ if (e.key==='Escape') ul.hidden=true; });
+}
+for (const id of ['q','rtFrom','rtTo']) attachAC($(id));
+
 /* ---------- Trajet ---------- */
 let ROUTE = store.get('route', null);
 async function getRoute(a, b){
@@ -796,12 +849,13 @@ function rtRow(o, avg){
     <div class="pr${o.p < avg-0.5 ? ' g' : ''}">${fmt1(o.p)}<small>${o.disc ? 'rabais −'+fmt1(o.disc)+' ¢' : money(o.cost)}</small></div></a>${starBtn(o.s)}</li>`;
 }
 function renderRoute(){
-  $('rtFrom').textContent = ROUTE ? ROUTE.from.label : (pos ? pos.label : 'ta position');
+  $('rtFrom').placeholder = pos ? `Ma position (${pos.label})` : 'Ma position';
+  if (ROUTE && ROUTE.fromCustom && document.activeElement!==$('rtFrom') && !$('rtFrom').value) $('rtFrom').value = ROUTE.from.label;
   if (ROUTE && document.activeElement!==$('rtTo') && !$('rtTo').value) $('rtTo').value = ROUTE.to.label.replace(/ \((centre|secteur)\)$/,'');
   if (!ROUTE || !S.length) { $('rtHero').innerHTML=''; $('rtList').innerHTML=''; $('rtLh').hidden=true; $('rtNote').textContent=''; return; }
   const out = routeCandidates(), L=+set.tank||50;
   const dur = ROUTE.min ? ` · ${Math.floor(ROUTE.min/60)} h ${String(Math.round(ROUTE.min%60)).padStart(2,'0')}` : '';
-  $('rtNote').textContent = `Trajet ${ROUTE.from.label} → ${ROUTE.to.label} : ${Math.round(ROUTE.km)} km${dur}.` + (ROUTE.approx ? ' Le serveur d\'itinéraires ne répondait pas : trajet approximatif en ligne droite.' : ' Itinéraire © OpenStreetMap / OSRM.');
+  $('rtNote').textContent = `Trajet ${ROUTE.from.label} → ${ROUTE.to.label} : ${Math.round(ROUTE.km)} km${dur}.` + (ROUTE.approx ? ' Le serveur d\'itinéraires ne répondait pas : trajet approximatif en ligne droite.' : ' Itinéraire et adresses © OpenStreetMap (OSRM, Photon).');
   if (!out.length) { $('rtHero').innerHTML = `<p class="empty">Aucune station n'affiche de ${FUEL[set.fuel].toLowerCase()} à ${set.det} km ou moins de ta route. Essaie un détour plus grand.</p>`; $('rtList').innerHTML=''; $('rtLh').hidden=true; return; }
   const t = out[0], avgCost = out.reduce((a,o)=>a+o.cost,0)/out.length, avg = out.reduce((a,o)=>a+o.p,0)/out.length, net = avgCost - t.cost;
   $('rtHero').innerHTML = `<div class="hero">
@@ -819,17 +873,21 @@ function renderRoute(){
 }
 $('rtForm').addEventListener('submit', async e=>{
   e.preventDefault();
-  if (!pos) { $('rtErr').textContent='Choisis d\'abord ton point de départ.'; return; }
-  const to = locate($('rtTo').value);
-  if (!to) { $('rtErr').textContent='Destination introuvable. Essaie une ville du Québec (ex. Québec, Sherbrooke) ou un code postal.'; return; }
+  $('rtErr').textContent='Recherche des adresses…';
+  const fq = $('rtFrom').value.trim(), fromCustom = !!fq;
+  const f = fromCustom ? ($('rtFrom')._pick || await geocode(fq)) : pos;
+  if (!f) { $('rtErr').textContent = fromCustom ? 'Départ introuvable. Essaie une adresse complète, une ville ou un code postal.' : 'Choisis ton point de départ.'; return; }
+  const t = $('rtTo')._pick || await geocode($('rtTo').value);
+  if (!t) { $('rtErr').textContent='Destination introuvable. Essaie une adresse complète (ex. 2450 boul. Laurier, Québec), une ville ou un code postal.'; return; }
+  const to = {lat:t.lat, lon:t.lon, label:t.label};
   $('rtErr').textContent='Calcul de l\'itinéraire…';
-  const from = {lat:pos.lat, lon:pos.lon, label:pos.label};
+  const from = {lat:f.lat, lon:f.lon, label:fromCustom ? f.label : f.label};
   const r = await getRoute(from, to);
-  ROUTE = Object.assign(r, {from, to});
+  ROUTE = Object.assign(r, {from, to, fromCustom});
   try { store.set('route', ROUTE); } catch(e) {}
   $('rtErr').textContent=''; render();
 });
-$('rtFromChg').addEventListener('click', ()=>{ showTab('list'); $('posform').hidden=false; $('q').focus(); });
+
 
 /* ---------- Favoris ---------- */
 document.addEventListener('click', e=>{
